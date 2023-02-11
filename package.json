@@ -4,8 +4,7 @@
   "description": "An application for downloading, modifying and adding songs as .mp3 files to spotify.",
   "main": "main.js",
   "scripts": {
-    "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -w && sass src/main.scss:dist/style.css",
     "start": "npx electron ."
   },
   "author": "",

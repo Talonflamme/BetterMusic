@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import ContentTab from './ContentTab';
 import FilePage from './FilePage';
-import './MainContent.scss';
 
 const MainContentTabLink: React.FC<MainContentTabLinkProps> = ({ className, children, id, setCurrentTab }) => {
     const onClick = () => {

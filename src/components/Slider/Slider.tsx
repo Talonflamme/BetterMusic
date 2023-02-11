@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import './Slider.scss';
 
 const Slider: React.FC<SliderProps> = ({ min, max, startingValue, className, value, setValue, onlyUpdateOnConfirm, onConfirm, ...props }) => {
     // internal value is used when either no value is provided in props or when currently dragging

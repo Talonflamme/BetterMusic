@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { SongContext, Song } from '../../Song';
 import * as mm from 'music-metadata-browser';
-import ima from '../../../assets/fnf.svg';
 
 
 const SongInfo: React.FC<SongInfoProps> = ({ }) => {
@@ -21,7 +20,7 @@ const SongInfo: React.FC<SongInfoProps> = ({ }) => {
 
     return (
         <div id="song-info" className="flex-center">
-            <img src={imageData ?? ima} id="cover-image" />
+            <img src={imageData ?? "../assets/fnf.svg"} id="cover-image" />
             <div className="wrapper">
                 <div className="title label">{song.title}</div>
                 <div className="artist label">{song.artist}</div>

@@ -4,14 +4,15 @@
     "module": "CommonJS",
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "sourceMap": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "removeComments": false,
     "noImplicitAny": false,
-    "outDir": "dist",
+    "outDir": "./dist",
     "suppressImplicitAnyIndexErrors": true,
     "jsx": "react",
+    "inlineSourceMap": true,
+    // "sourceMap": true,
   },
   "exclude": [
     "node_modules"

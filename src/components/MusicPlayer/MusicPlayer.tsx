@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import Slider from '../Slider/Slider';
-import './MusicPlayer.scss';
 import PlayButton from './PlayButton';
 import SongInfo from './SongInfo';
 import VolumeControl from './VolumeControl';

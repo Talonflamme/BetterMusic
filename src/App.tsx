@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import MainContent from './components/content/MainContent';
 import MusicPlayerContainer from './components/MusicPlayer/MusicPlayerContainer';
 import { Song, SongContext } from './Song';
-import './style.scss';
 
 
 const sampleSong: Song = {

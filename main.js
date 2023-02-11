@@ -1,17 +1,15 @@
 const { app, BrowserWindow } = require('electron');
-const React = require('react');
-const ReactDOM = require('react-dom');
+const electronReload = require('electron-reload');
 
 function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
     }
   });
+  win.maximize();
 
   // Load index.html
   win.loadFile('public/index.html');
@@ -31,7 +29,7 @@ app.on('activate', () => {
   }
 });
 
-// electronReload(__dirname, {
-//   electron: require(`${__dirname}/node_modules/electron`),
-//   watch: ["public/index.html"]
-// });
+electronReload(__dirname, {
+  // electron: require(`${__dirname}/node_modules/electron`),
+  watch: ["public/index.html", "dist"]
+});
