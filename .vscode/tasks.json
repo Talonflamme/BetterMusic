@@ -1,0 +1,14 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+            "label": "Webpack",
+            "type": "shell",
+            "command": "npx webpack -w",
+			"runOptions": {
+				"runOn": "folderOpen"
+			},
+			"isBackground": true
+		}
+	]
+}
