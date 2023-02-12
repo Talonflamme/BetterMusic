@@ -1,4 +1,6 @@
 import React from 'react';
+import PauseIcon from '../icons/PauseIcon';
+import PlayIcon from '../icons/PlayIcon';
 
 const PlayButton: React.FC<PlayButtonProps> = ({ isPlaying, setIsPlaying }) => {
     const onClick = () => {
@@ -8,15 +10,7 @@ const PlayButton: React.FC<PlayButtonProps> = ({ isPlaying, setIsPlaying }) => {
     return (
         <button id="play-button" className="btn" onClick={onClick}>
             {
-                isPlaying ?
-                    // pause button
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
-                    </svg>
-                    : // play button
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M8 5v14l11-7z"></path>
-                    </svg>
+                isPlaying ? <PauseIcon /> : <PlayIcon />
             }
         </button>
     )

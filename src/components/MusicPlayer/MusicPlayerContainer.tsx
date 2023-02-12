@@ -1,5 +1,5 @@
 import React, { useRef, useContext } from 'react';
-import { SongContext, Song } from '../../Song'; 
+import { SongContext } from '../../Song';
 import MusicPlayer from './MusicPlayer';
 
 /**
@@ -7,11 +7,11 @@ import MusicPlayer from './MusicPlayer';
  */
 const MusicPlayerContainer: React.FC<AudioPlayerProps> = ({ }) => {
     const audioRef = useRef<HTMLAudioElement>(null);
-    const currentSong: Song = useContext(SongContext);
-    
+    const { song } = useContext(SongContext);
+
     return (<>
-        <audio src={currentSong.src} ref={audioRef} />
-        <MusicPlayer audioRef={audioRef} />
+        <audio src={song.src} ref={audioRef} />
+        <MusicPlayer audioRef={audioRef} song={song} />
     </>)
 }
 

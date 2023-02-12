@@ -13,8 +13,8 @@ body {
 }
 
 #root {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: 1fr 80px;
     height: 100vh;
 }
 
@@ -30,9 +30,18 @@ body {
     text-decoration: none;
     font-size: 15px;
     font-family: inherit;
+    transition: scale 0.1s ease, background-color 0.1s ease;
 
     &:focus-visible {
         outline: none;
+    }
+
+    &:hover {
+        scale: 1.05;
+    }
+
+    &:active {
+        scale: 1.1;
     }
 }
 
@@ -40,4 +49,37 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+
+/* ===== Scrollbar CSS ===== */
+.scrollable {
+    overflow-y: auto;
+    $scrollbar-margin: 4px;
+    $scrollbar-thumb-width: 12px;
+
+    &::-webkit-scrollbar {
+        width: $scrollbar-thumb-width + 2 * $scrollbar-margin;
+    }
+
+    &::-webkit-scrollbar-track {
+        border-radius: 10px;
+        border: $scrollbar-margin solid transparent; // basically margin
+        background: change-color($bg-color, $lightness: 12%) padding-box; // need padding-box for "margin" to work
+    }
+
+    &::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+        background: change-color($bg-color, $lightness: 33%) padding-box; // need padding-box for "margin" to work
+        border: $scrollbar-margin solid transparent; // basically margin
+        min-height: 48px;
+
+        &:hover {
+            background-color: change-color($color: $bg-color, $lightness: 39%);
+        }
+        
+        &:active {
+            background-color: change-color($color: $bg-color, $lightness: 44%);
+        }
+    }
 }

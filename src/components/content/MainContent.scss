@@ -3,10 +3,10 @@
 
 
 #content {
-    height: 100%;
     display: flex;
     flex-direction: column;
-    
+    overflow-y: hidden;
+
     header {
         width: 100%;
         height: 64px;
@@ -20,13 +20,13 @@
             border-radius: 6px;
             color: $mono-1;
             font-size: 18px;
-            
+
             svg {
                 width: 36px;
                 height: 36px;
             }
         }
-        
+
         .tab-link {
             display: flex;
             transition: background-color 0.2s ease;
@@ -49,12 +49,10 @@
     }
 
     #tab-wrapper {
-        display: flex;
         height: 100%;
+        align-items: normal;
+        overflow-y: auto;
 
-        #sidebar {
-            width: $sidebar-width;
-        }
+        margin-left: $sidebar-width;
     }
 }
-

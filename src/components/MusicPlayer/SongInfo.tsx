@@ -1,25 +1,30 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { SongContext, Song } from '../../Song';
+import { SongContext } from '../../Song';
+import { getImageFromMetadata } from '../../Files';
 import * as mm from 'music-metadata-browser';
+import fs from 'fs';
 
 
 const SongInfo: React.FC<SongInfoProps> = ({ }) => {
-    const song: Song = useContext(SongContext);
+    const { song } = useContext(SongContext);
     const [imageData, setImageData] = useState<string>(null);
 
     useEffect(() => {
-        // fetch metadata from file using music-metadata-browser
-        mm.fetchFromUrl(song.src).then(metadata => {
-            const pic = metadata.common.picture[0];
-            if (pic !== undefined) {
-                const base64 = `data:${pic.format};base64,${pic.data.toString("base64")}`;
-                setImageData(base64);
+        (async () => {
+            try {
+                await fs.promises.access(song.src); // check if file exists
+                const metadata = await mm.fetchFromUrl(song.src);
+                const pic = getImageFromMetadata(metadata)
+                setImageData(pic);
+            } catch (err) {
+                // file not found
+                setImageData(null);
             }
-        });
+        })();
     }, [song.src]);
 
     return (
-        <div id="song-info" className="flex-center">
+        <div className="song-info flex-center">
             <img src={imageData ?? "../assets/fnf.svg"} id="cover-image" />
             <div className="wrapper">
                 <div className="title label">{song.title}</div>
