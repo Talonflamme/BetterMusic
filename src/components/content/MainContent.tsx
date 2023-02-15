@@ -15,6 +15,11 @@ const MainContentTabLink: React.FC<MainContentTabLinkProps> = ({ className, chil
 
 const MainContent: React.FC<MainContentProps> = ({ }) => {
     const [currentTab, setCurrentTab] = useState(1); // defines which tab should be shown e.g: 0 -> 'Files'
+    const [fileReloadToggle, setFileReloadToggle] = useState<boolean>(false);
+
+    const reloadFiles = () => {
+        setFileReloadToggle(!fileReloadToggle);
+    }
 
     return (
         <div id="content">
@@ -38,10 +43,10 @@ const MainContent: React.FC<MainContentProps> = ({ }) => {
 
             <div id="tab-wrapper" className="flex-center">
                 <ContentTab id={0} currentTab={currentTab}>
-                    <FilePage />
+                    <FilePage toggleState={fileReloadToggle} />
                 </ContentTab>
                 <ContentTab id={1} currentTab={currentTab}>
-                    <DownloadPage />
+                    <DownloadPage reloadFiles={reloadFiles} />
                 </ContentTab>
                 <ContentTab id={2} currentTab={currentTab} />
             </div>

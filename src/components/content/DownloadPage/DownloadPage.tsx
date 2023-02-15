@@ -4,7 +4,7 @@ import DownloadVideoWizard from './DownloadVideoWizard';
 import SearchResults from './SearchResults';
 import { search, YtVideo } from './YouTubeSearch';
 
-const DownloadPage: React.FC<DownloadPageProps> = (props) => {
+const DownloadPage: React.FC<DownloadPageProps> = ({ reloadFiles, ...props }) => {
     const [query, setQuery] = useState("");
     const [searchResults, setSearchResults] = useState<YtVideo[]>(null);
     const [downloadVideo, setDownloadVideo] = useState<YtVideo>(null);
@@ -48,13 +48,13 @@ const DownloadPage: React.FC<DownloadPageProps> = (props) => {
             </div>
 
             <SearchResults searchResults={searchResults} setDownload={setDownloadVideo} />
-            <DownloadVideoWizard video={downloadVideo} setVideo={setDownloadVideo} />
+            <DownloadVideoWizard video={downloadVideo} setVideo={setDownloadVideo} reloadFiles={reloadFiles} />
         </div>
     )
 };
 
 interface DownloadPageProps {
-    style?: React.CSSProperties
+    reloadFiles: () => void
 }
 
 export default DownloadPage;

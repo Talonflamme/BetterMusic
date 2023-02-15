@@ -8,13 +8,14 @@ import { downloadMP3 } from './Download';
 import FilepathInput from './FilepathInput';
 import path from 'path';
 import os from 'os';
+import CheckmarkIcon from '../../icons/CheckmarkIcon';
 
-const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVideo }) => {
+const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVideo, reloadFiles }) => {
     const [imageSrc, setImageSrc] = useState<string>(null);
     const [downloading, setDownloading] = useState(false);
+    const [downloadSuccess, setDownloadSuccess] = useState<boolean | null>(null);
     const [title, setTitle] = useState("");
     const [filepath, setFilepath] = useState("");
-    const [filepathValid, setFilepathValid] = useState(true); // todo
     const artistRef = useRef<HTMLInputElement>(null);
 
     const openImageDialog = () => {
@@ -39,7 +40,20 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
     }
 
     const download = () => {
-        downloadMP3(video, filepath + ".mp3", title, artistRef.current.value);
+        if (downloadSuccess === true) return;
+
+        const t = title || tryGuessTitle(video.title);
+        const a = artistRef.current.value || tryGuessArtist(video.title);
+        downloadMP3(video, imageSrc, filepath + ".mp3", t, a)
+            .then(() => {
+                setDownloading(false);
+                setDownloadSuccess(true);
+                reloadFiles(); // reloads files in 'File' tab
+            })
+            .catch(err => {
+                setDownloading(false);
+                setDownloadSuccess(false);
+            });
         setDownloading(true);
     }
 
@@ -53,6 +67,10 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
         const t = title || tryGuessTitle(video?.title);
         setFilepath(getDefaultFilepath(t));
     }, [video?.vidId]);
+
+    useEffect(() => {
+        setDownloadSuccess(null);
+    }, [video?.vidId, title, artistRef.current?.value, filepath, imageSrc]);
 
     return (
         <div id="download-wizard-overlay" style={video ? { display: 'block' } : {}}>
@@ -81,10 +99,16 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
                 <FilepathInput value={filepath} setValue={setFilepath} />
 
                 <button className="btn flex-center download-button" onClick={onDownloadClicked}>{
-                    downloading ?
-                        <Spinner radius={24} stroke={3} />
-                        : "Download"
-                }</button>
+                    downloadSuccess === null ?
+                        (downloading ?
+                            <Spinner radius={24} stroke={3} />
+                            : "Download") :
+                        (downloadSuccess ?
+                            <CheckmarkIcon className="download-success-icon" /> :
+                            <CancelIcon className="download-success-icon" />)
+                }
+                </button>
+
             </div>
         </div>
     )
@@ -143,7 +167,8 @@ function removeBrackets(str: string) {
 
 interface DownloadVideoWizardProps {
     video?: YtVideo,
-    setVideo: (url: YtVideo) => void
+    setVideo: (url: YtVideo) => void,
+    reloadFiles: () => void
 }
 
 export default DownloadVideoWizard;

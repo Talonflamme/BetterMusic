@@ -1,15 +1,15 @@
 import React from 'react';
-import { useFiles, convertFiles } from '../../../Files';
-import useAsyncEffect from '../../../useAsyncState';
+import { convertFiles, getFiles } from '../../../Files';
+import { Song } from '../../../Song';
+import useAsyncState from '../../../useAsyncState';
 import SongCard from './SongCard';
 
-const FilePage: React.FC<FilePageProps> = (props) => {
-    const files = useFiles();
-    const [songs] = useAsyncEffect(async () => {
-        const songs = await convertFiles(files);
-        songs.sort((a, b) => a.title.localeCompare(b.title));
-        return songs;
-    }, [files], []); // get songs and sort alphabetically
+const FilePage: React.FC<FilePageProps> = ({ toggleState, ...props }) => {
+    const [songs] = useAsyncState(async () => {
+        const s: Song[] = await upgradeSongs(songs ?? []);
+        s.sort((a, b) => a.title.localeCompare(b.title));
+        return s;
+    }, [toggleState], []); // get songs and sort alphabetically
 
     return (
         <div id="songs" className="scrollable" {...props}>
@@ -18,8 +18,17 @@ const FilePage: React.FC<FilePageProps> = (props) => {
     )
 };
 
+async function upgradeSongs(songs: Song[]): Promise<Song[]> {
+    const files = await getFiles(); // file locations for files
+    const oldSongs: Song[] = songs.filter(song => files.includes(song.src));
+    const sources = new Set(songs.map(x => x.src));
+    const missingSources = files.filter(x => !sources.has(x));
+    const newSongs = await convertFiles(missingSources);
+    return oldSongs.concat(newSongs);
+}
+
 interface FilePageProps {
-    style?: React.CSSProperties
+    toggleState: boolean
 }
 
 export default FilePage;

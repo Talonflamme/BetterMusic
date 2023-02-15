@@ -1,46 +1,65 @@
 import { YtVideo } from "./YouTubeSearch";
 import fs from 'fs';
 import path from 'path';
-// import ffmpeg from 'fluent-ffmpeg';
-import childProcess from 'child_process';
+import { spawn } from 'child_process';
 
-export async function downloadMP3(video: YtVideo, filepath: string, title: string, artist: string) {
-    // const stream = await getHighestResolutionStream(video.vidId);
-    // const tempPath = await createPath(stream.filetype);
-    const tempPath = path.join(process.cwd(), "pfs6uq34.mp4");
-    // await downloadVideo(stream, tempPath);
+export async function downloadMP3(video: YtVideo, imageSrc: string, filepath: string, title: string, artist: string) {
+    const stream = await getHighestResolutionStream(video.vidId);
+    const tempPath = await createPath(stream.filetype);
+    await downloadVideo(stream, tempPath);
     try {
-        await convertToMP3(tempPath, "C:\\Users\\pasca\\Downloads\\aries_pfp.jpg", filepath, "Glitter", "Aries");
+        await convertToMP3(tempPath, imageSrc, filepath, title, artist);
     } finally {
         // delete temporary file
-        // fs.unlink(tempPath, err => {
-        //     throw err;
-        // });
+        fs.unlink(tempPath, err => {
+            if (err) {
+                throw err;
+            }
+        });
     }
 }
 
 async function convertToMP3(vidPath: string, coverPath: string, outputPath: string, title: string, artist: string): Promise<void> {
-    console.log("Starting ffmepg!");
-    // ffmpeg(vidPath)
-    //     .on('error', (err, out, err_out) => {
-    //         console.error(err_out);
-    //     })
-    //     .on("end", () => {
-    //         console.log("Ended!!");
-    //     })
-    //     .input(coverPath)
-    //     .outputOptions("-map", "0", "-map", "1", "-c", "copy")
-    //     .outputOptions("-metadata", `title=${title}`, "-metadata", `artist=${artist}`, "-metadata", `album=${title}`, "-id3v2_version", "3")
-    //     .output(outputPath)
-    //     .run();
-    // todo error in process; title and artist are empty above?
-    outputPath = `C:\\Users\\pasca\\Downloads\\Glitter${Math.random()}.mp3`;
-    childProcess.exec(`ffmpeg -i ${vidPath} -i ${coverPath} -map 0 -map 1 -c copy -metadata artist=${artist} -metadata title=${title} -id3v2_version 3 ${outputPath}`, { timeout: 5000 }, (err, out) => {
-        if (err) {
+    return new Promise((resolve, reject) => {
+        // convert .mp4 to .mp3
+        const ffmpegInputProcess = spawn('ffmpeg', [
+            '-i', vidPath,
+            '-vn', // disable video processing, only extract audio
+            '-f', 'mp3', // mp3 output format
+            '-' // send output to stdout
+        ], { timeout: 2000 });
+        // add cover and metadata to .mp3
+        const ffmpegOutputProcess = spawn('ffmpeg', [
+            '-y', // overwrite existing file
+            '-i', '-', // read input from stdin
+            '-i', coverPath,
+            '-map', '0', // map audio to output
+            '-map', '1', // map image (cover) to output
+            '-id3v2_version', '3',
+            '-metadata', `artist=${artist}`,
+            '-metadata', `title=${title}`,
+            '-metadata', `album=${title}`,
+            outputPath
+        ], { timeout: 5000 });
+
+        ffmpegInputProcess.stdout.pipe(ffmpegOutputProcess.stdin);
+
+        ffmpegInputProcess.on('error', (err: Error) => {
+            reject(err);
+        });
+
+        ffmpegOutputProcess.on('error', (err: Error) => {
             console.error(err);
-        } else {
-            console.log(out);
-        }
+            reject(err);
+        });
+
+        ffmpegOutputProcess.on('close', (code: number) => {
+            if (code === 0) {
+                resolve();
+            } else {
+                reject(new Error(`ffmpeg exited with code ${code}`));
+            }
+        });
     });
 }
 
@@ -59,7 +78,6 @@ async function downloadVideo(stream: ParsedFormat, filePath: string): Promise<vo
             // @ts-expect-error
             const buffer = Buffer.from(reader.result);
             fs.writeFileSync(filePath, buffer);
-            console.log("Written to: " + filePath);
             resolve();
         }
     });
@@ -97,7 +115,7 @@ async function getHighestResolutionStream(id: string): Promise<ParsedFormat> {
         body
     });
     const json: any = await response.json();
-    const streamingData: StreamingData = json.streamingData; // todo sometimes undefined?
+    const streamingData: StreamingData = json.streamingData;
 
     const formats: Format[] = (streamingData.adaptiveFormats ?? []); // this includes video/audio and both
     formats.push(...(streamingData.formats ?? []));

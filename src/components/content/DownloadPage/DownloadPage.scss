@@ -227,6 +227,7 @@
             }
 
             .download-button {
+                position: relative;
                 align-self: center;
                 background: $blue;
                 color: $bg-color;
@@ -235,8 +236,12 @@
                 font-size: 18px;
                 font-weight: 550;
                 margin-top: 14px;
-            }
 
+                .download-success-icon {
+                    width: 48px;
+                    height: 48px;
+                }
+            }
 
             .validation {
                 color: $red;

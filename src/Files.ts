@@ -7,21 +7,19 @@ import * as mm from 'music-metadata-browser';
 
 const fileDirs = localStorage.getItem("fileDirs")?.split(",") ?? [];
 
-export function useFiles() {
-    const files = useMemo(() => {
-        const lst: string[] = [];
-        try {
-            fileDirs.forEach(dir => {
-                const read = fs.readdirSync(dir).filter(x => x.endsWith(".mp3")).map(x => path.join(dir, x));
-                lst.push(...read);
-            })
-        } catch (err) {
-            console.error(err);
-        }
-        return lst;
-    }, [fileDirs]);
-
-    return files;
+export async function getFiles() {
+    const lst: string[] = [];
+    try {
+        const promises = fileDirs.map(async(dir) => {
+            const files = await fs.promises.readdir(dir);
+            return files.filter(x => x.endsWith(".mp3")).map(x => path.join(dir, x));
+        });
+        const files = (await Promise.all(promises)).flat(); // 2d array to 1d array
+        return files;
+    } catch (err) {
+        console.error(err);
+    }
+    return lst;
 }
 
 export function getImageFromMetadata(metadata: mm.IAudioMetadata) {
@@ -34,7 +32,7 @@ export async function convertFile(file: string): Promise<Song> {
     return new Promise(async (resolve, reject) => {
         try {
             const metadata = await mm.fetchFromUrl(file);
-            
+
             const song: Song = {
                 artist: metadata.common.artist || 'Unknown Artist',
                 title: metadata.common.title || 'Unknown Title',
@@ -42,7 +40,7 @@ export async function convertFile(file: string): Promise<Song> {
                 imagePath: getImageFromMetadata(metadata) || "../assets/fnf.svg"
             };
             resolve(song);
-        } catch(error) {
+        } catch (error) {
             reject(error);
         }
     });
