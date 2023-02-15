@@ -3,7 +3,7 @@ import { useFiles, convertFiles } from '../../../Files';
 import useAsyncEffect from '../../../useAsyncState';
 import SongCard from './SongCard';
 
-const FilePage: React.FC<FilePageProps> = ({ style }) => {
+const FilePage: React.FC<FilePageProps> = (props) => {
     const files = useFiles();
     const [songs] = useAsyncEffect(async () => {
         const songs = await convertFiles(files);
@@ -12,7 +12,7 @@ const FilePage: React.FC<FilePageProps> = ({ style }) => {
     }, [files], []); // get songs and sort alphabetically
 
     return (
-        <div id="songs" className="scrollable" style={style}>
+        <div id="songs" className="scrollable" {...props}>
             {songs.map(song => <SongCard key={song.src} song={song} />)}
         </div>
     )

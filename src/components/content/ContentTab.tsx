@@ -20,9 +20,8 @@ const ContentTab: React.FC<ContentTabProps> = ({ id, currentTab, children }) => 
 
 function editProp(children: React.ReactNode, visible: boolean): React.ReactNode {
     return React.Children.map(children, (child: React.ReactElement) => {
-        if (visible) return child;
-        const style = child.props.style ?? {};
-        return React.cloneElement(child, { style: { ...style, display: "none" } });
+        if (!visible) return child;
+        return React.cloneElement(child, { "tab-active": "true" });
     });
 }
 

@@ -1,0 +1,278 @@
+#download-page {
+    width: 100%;
+    justify-content: flex-start;
+    flex-flow: column;
+    margin-top: 32px;
+    gap: 12px;
+
+    .input-wrapper {
+        position: relative;
+        color: $bg-color;
+
+        #search-bar {
+            width: max(256px, 32vw);
+        }
+
+        .icon-wrapper {
+            position: absolute;
+            right: 4px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            transition: background-color $default-transition, scale $default-transition;
+
+            #search-icon {
+                width: 26px;
+                aspect-ratio: 1/1;
+            }
+        }
+
+        &:has(#search-bar:not([value=""])) .icon-wrapper {
+            &:hover {
+                background: rgba(0, 0, 0, 0.1);
+                scale: 1.05;
+            }
+
+            &:active {
+                background: rgba(0, 0, 0, 0.175);
+                scale: 1.1;
+            }
+
+            #search-icon {
+                cursor: pointer;
+            }
+        }
+    }
+
+    #search-results {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-flow: column;
+        align-items: center;
+        padding: 8px 0 22px 0;
+        gap: 12px;
+
+        .search-result {
+            border: $simple-border;
+            width: max(320px, 30%);
+            border-radius: 8px;
+            position: relative;
+
+            .thumbnail {
+                width: 100%;
+                aspect-ratio: 16/9;
+                object-fit: contain;
+                display: flex;
+                align-items: center;
+                background: black;
+                border-radius: 8px 8px 0 0;
+            }
+
+            .details {
+                display: grid;
+                grid-template-columns: 40% 60%;
+
+                .channel-info, .video-info {
+                    overflow: hidden;
+                    flex-flow: column;
+                    padding: 8px;
+                }
+
+                .channel-info {
+                    align-items: center;
+                    justify-content: center;
+
+                    .channel-thumbnail {
+                        width: 56px;
+                        height: 56px;
+                        border-radius: 6px;
+                    }
+                }
+
+                .video-info {
+                    display: flex;
+                    flex-flow: column;
+                    justify-content: center;
+                    border-left: $simple-border;
+                }
+
+                .label {
+                    max-width: 100%;
+                    font-size: 16px;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+
+                    &.title {
+                        font-size: 18px;
+                        font-weight: bold;
+                        white-space: normal;
+                    }
+
+                    &.views, &.release-date {
+                        font-size: 14px;
+                        color: $mono-2;
+                    }
+                }
+            }
+
+            .download-button {
+                position: absolute;
+                right: 0px;
+                top: 0px;
+                width: 40px;
+                border-radius: 0 8px 0 10px;
+                height: 40px;
+                background: $mono-1;
+                opacity: 0;
+                transition: opacity $default-transition;
+
+                #download-icon {
+                    padding: 3px;
+                    color: $bg-color;
+                }
+            }
+
+            &:hover .download-button {
+                opacity: 1;
+                cursor: pointer;
+            }
+        }
+    }
+
+    #download-wizard-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 3;
+        background-color: rgba(0, 0, 0, 0.5);
+
+        #download-wizard {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            translate: -50% -50%;
+            width: 480px;
+            max-height: max(520px, 40%);
+            border-radius: 12px;
+            background: $secondary-bg;
+            padding: 12px 26px 22px 26px;
+            display: flex;
+            flex-flow: column;
+            justify-content: center;
+
+            .thumbnail-wrapper {
+                align-self: center;
+                position: relative;
+
+                .thumbnail {
+                    border-radius: 4px;
+                    max-height: 270px;
+                    object-fit: contain;
+                    cursor: pointer;
+                }
+
+                .remove-thumbnail-button {
+                    opacity: 0;
+                    pointer-events: none;
+                    position: absolute;
+                    color: $red;
+                    top: 1px;
+                    right: 1px;
+                    width: 28px;
+                    height: 28px;
+                    background: rgba(0, 0, 0, 0.075);
+
+                    &:hover {
+                        background: rgba(0, 0, 0, 0.125);
+                    }
+
+                    &:active {
+                        background: rgba(0, 0, 0, 0.15);
+                    }
+
+                    >svg {
+                        padding: 1px;
+                    }
+                }
+
+                &:hover .remove-thumbnail-button {
+                    pointer-events: all;
+                    opacity: 1;
+                }
+            }
+
+            h3 {
+                text-align: center;
+                margin-bottom: 0;
+            }
+
+            >*:not(label):not(:last-child) {
+                margin-bottom: 8px;
+            }
+
+            label {
+                margin-top: 2px;
+            }
+
+            .cancel-button {
+                color: $mono-1;
+                position: absolute;
+                top: 4px;
+                right: 4px;
+            }
+
+            .download-button {
+                align-self: center;
+                background: $blue;
+                color: $bg-color;
+                min-width: 122px;
+                height: 42px;
+                font-size: 18px;
+                font-weight: 550;
+                margin-top: 14px;
+            }
+
+
+            .validation {
+                color: $red;
+                font-size: 12px;
+            }
+
+            #filepath-input-wrapper {
+                display: flex;
+                flex-flow: column;
+                position: relative;
+                justify-content: center;
+
+                #filepath-input {
+                    padding-right: 72px;
+                    width: auto;
+                }
+
+                #extension {
+                    position: absolute;
+                    right: 32px;
+                    color: $bg-color;
+                }
+
+                #select-file-icon {
+                    position: absolute;
+                    width: 26px;
+                    height: 26px;
+                    right: 4px;
+                    cursor: pointer;
+                    color: $mono-1;
+                }
+            }
+        }
+    }
+}
+
+#tab-wrapper:has(#download-page[tab-active]) {
+    margin-left: 0; // disable "sidebar"
+}

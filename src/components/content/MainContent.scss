@@ -54,5 +54,9 @@
         overflow-y: auto;
 
         margin-left: $sidebar-width;
+
+        >*:not([tab-active]) {
+            display: none;
+        }
     }
 }

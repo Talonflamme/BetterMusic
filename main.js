@@ -1,35 +1,58 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const electronReload = require('electron-reload');
+const os = require('os');
+const path = require('path');
+
 
 function createWindow() {
-  // Create the browser window.
-  const win = new BrowserWindow({
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false
-    }
-  });
-  win.maximize();
+    // Create the browser window.
+    const win = new BrowserWindow({
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false
+        }
+    });
+    win.maximize();
 
-  // Load index.html
-  win.loadFile('public/index.html');
+    // Load index.html
+    win.loadFile('public/index.html');
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+    createWindow();
+});
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
 });
 
 app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
+    if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow();
+    }
+});
+
+ipcMain.on('open-image-dialog', event => {
+    dialog.showOpenDialog({
+        properties: ['openFile'],
+        filters: [{ name: "Image", extensions: ["jpg", "jpeg", "png", "gif"] }]
+    }).then(files => {
+        event.sender.send('selected-image-dialog', files);
+    });
+});
+
+ipcMain.on('open-mp3-dialog', event => {
+    dialog.showSaveDialog({
+        properties: ['showOverwriteConfirmation'],
+        filters: [{ name: "MP3s", extensions: ["mp3"] }]
+    }).then(files => {
+        event.sender.send('selected-mp3-dialog', files);
+    });
 });
 
 electronReload(__dirname, {
-  // electron: require(`${__dirname}/node_modules/electron`),
-  watch: ["public/index.html", "dist"]
+    // electron: require(`${__dirname}/node_modules/electron`),
+    watch: ["public/index.html", "dist"]
 });

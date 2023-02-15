@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ContentTab from './ContentTab';
+import DownloadPage from './DownloadPage/DownloadPage';
 import FilePage from './FilePage/FilePage';
 
 const MainContentTabLink: React.FC<MainContentTabLinkProps> = ({ className, children, id, setCurrentTab }) => {
@@ -13,7 +14,7 @@ const MainContentTabLink: React.FC<MainContentTabLinkProps> = ({ className, chil
 }
 
 const MainContent: React.FC<MainContentProps> = ({ }) => {
-    const [currentTab, setCurrentTab] = useState(0); // defines which tab should be shown e.g: 0 -> 'Files'
+    const [currentTab, setCurrentTab] = useState(1); // defines which tab should be shown e.g: 0 -> 'Files'
 
     return (
         <div id="content">
@@ -39,7 +40,9 @@ const MainContent: React.FC<MainContentProps> = ({ }) => {
                 <ContentTab id={0} currentTab={currentTab}>
                     <FilePage />
                 </ContentTab>
-                <ContentTab id={1} currentTab={currentTab} />
+                <ContentTab id={1} currentTab={currentTab}>
+                    <DownloadPage />
+                </ContentTab>
                 <ContentTab id={2} currentTab={currentTab} />
             </div>
         </div>

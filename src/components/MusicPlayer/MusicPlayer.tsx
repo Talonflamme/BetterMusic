@@ -67,7 +67,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ audioRef, song }) => {
     }, [audioRef.current]);
 
     return (
-        <div id="player">
+        <footer id="player">
             <SongInfo />
             <div id="middle-section" className="flex-center">
                 <PlayButton isPlaying={isPlaying} setIsPlaying={setIsPlaying} />
@@ -81,7 +81,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ audioRef, song }) => {
                 </div>
             </div>
             <VolumeControl setVolume={setVolume} />
-        </div>
+        </footer>
     )
 };
 
