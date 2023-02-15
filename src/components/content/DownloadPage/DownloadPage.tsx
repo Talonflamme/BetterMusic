@@ -24,20 +24,6 @@ const DownloadPage: React.FC<DownloadPageProps> = ({ reloadFiles, ...props }) =>
         onSend();
     }
 
-    useEffect(() => { // todo
-        setQuery("a");
-        setTimeout(() => {
-            const img = document.querySelector("#download-page .icon-wrapper") as HTMLDivElement;
-            img.click();
-        }, 50);
-    }, []);
-
-    useEffect(() => { // todo
-        if (!searchResults?.length) return;
-        if (!downloadVideo)
-            setDownloadVideo(searchResults[0]);
-    }, [searchResults]);
-
     return (
         <div id="download-page" className="flex-center" {...props}>
             <div className="input-wrapper flex-center">
