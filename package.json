@@ -4,13 +4,12 @@
   "description": "An application for downloading, modifying and adding songs as .mp3 files to spotify.",
   "main": "main.js",
   "scripts": {
-    "build": "tsc -w && sass src/main.scss:dist/style.css",
+    "build": "tsc -p build.tsconfig.json && sass src/main.scss:dist/style.css",
     "start": "npx electron ."
   },
   "author": "Pascal Oberdörfer",
   "license": "ISC",
   "dependencies": {
-    "electron": "^23.0.0",
     "ffmpeg-static": "^5.1.0",
     "music-metadata-browser": "^2.5.9",
     "react": "^18.2.0",
@@ -18,10 +17,30 @@
     "react-spinner-material": "^1.4.0"
   },
   "devDependencies": {
+    "electron": "^23.0.0",
     "@types/electron": "^1.6.10",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
     "electron-reload": "^2.0.0-alpha.1",
     "sass": "^1.58.0"
+  },
+  "build": {
+    "productName": "Better Music",
+    "files": [
+      "dist/**/*",
+      "node_modules/**/*",
+      "public/**/*",
+      "assets/**/*",
+      "package.json",
+      "main.js",
+      "favicon.ico"
+    ],
+    "directories": {
+      "output": "build"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "bigicon.png"
+    }
   }
 }

@@ -1,6 +1,4 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
-const electronReload = require('electron-reload');
-const os = require('os');
 const path = require('path');
 
 
@@ -9,11 +7,13 @@ function createWindow() {
     const win = new BrowserWindow({
         webPreferences: {
             nodeIntegration: true,
-            contextIsolation: false
+            contextIsolation: false,
+            devTools: !app.isPackaged
         },
         icon: path.join(__dirname, "favicon.ico")
     });
     win.maximize();
+    win.setMenuBarVisibility(!app.isPackaged);
 
     // Load index.html
     win.loadFile('public/index.html');
@@ -61,7 +61,10 @@ ipcMain.on('open-directory-dialog', event => {
     });
 });
 
-electronReload(__dirname, {
-    // electron: require(`${__dirname}/node_modules/electron`),
-    watch: ["public/index.html", "dist"]
-});
+if (!app.isPackaged) {
+    const electronReload = require('electron-reload');
+    electronReload(__dirname, {
+        // electron: require(`${__dirname}/node_modules/electron`),
+        watch: ["public/index.html", "dist"]
+    });
+}
