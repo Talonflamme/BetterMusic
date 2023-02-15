@@ -1,0 +1,91 @@
+#settings {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    width: calc(70% - 24px);
+    padding: 18px 12px 12px;
+
+    label[for=filepaths] {
+        margin-bottom: 2px;
+    }
+
+    #add-text {
+        color: $blue;
+        font-size: 14px;
+        text-decoration: underline transparent solid;
+        transition: color $default-transition, text-decoration-color $default-transition;
+        cursor: pointer;
+
+        &:hover {
+            $h-color: darken($blue, 7.5%);
+            text-decoration-color: $h-color;
+            color: $h-color;
+        }
+
+        &:active {
+            $a-color: darken($blue, 15%);
+            text-decoration-color: $a-color;
+            color: $a-color;
+        }
+    }
+
+    #filepaths {
+        width: 100%;
+        display: flex;
+        flex-flow: column;
+        align-items: center;
+
+        .filepath {
+            display: flex;
+            align-items: center;
+            width: max(40%, 392px);
+            position: relative;
+
+            #file-input {
+                width: 100%;
+                box-sizing: border-box;
+                padding-right: 54px;
+            }
+
+            #file-icon {
+                position: absolute;
+                width: 26px;
+                height: 26px;
+                right: 24px;
+                cursor: pointer;
+                color: $mono-1;
+            }
+
+            #remove-icon {
+                position: absolute;
+                color: $mono-1;
+                width: 20px;
+                height: 20px;
+                right: 4px;
+                cursor: pointer;
+                transition: color $default-transition, scale $default-transition;
+
+                &:hover {
+                    color: $red;
+                    scale: 1.05;
+                }
+
+                &:active {
+                    scale: 1.1;
+                }
+            }
+
+            &:not(:last-child) {
+                margin-bottom: 8px;
+            }
+        }
+    }
+
+    #save-button {
+        margin: auto 0 0 0;
+        background-color: darken($blue, 10%);
+        color: $bg-color;
+        font-size: 16px;
+        font-weight: 550;
+    }
+}

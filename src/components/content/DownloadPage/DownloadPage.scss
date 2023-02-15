@@ -277,7 +277,3 @@
         }
     }
 }
-
-#tab-wrapper:has(#download-page[tab-active]) {
-    margin-left: 0; // disable "sidebar"
-}

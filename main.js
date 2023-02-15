@@ -52,6 +52,14 @@ ipcMain.on('open-mp3-dialog', event => {
     });
 });
 
+ipcMain.on('open-directory-dialog', event => {
+    dialog.showOpenDialog({
+        properties: ['openDirectory']
+    }).then(files => {
+        event.sender.send('selected-directory-dialog', files);
+    });
+});
+
 electronReload(__dirname, {
     // electron: require(`${__dirname}/node_modules/electron`),
     watch: ["public/index.html", "dist"]

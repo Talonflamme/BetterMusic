@@ -20,6 +20,11 @@
             border-radius: 6px;
             color: $mono-1;
             font-size: 18px;
+            width: 80px;
+
+            &:not(.tab-link) {
+                width: 132px;
+            }
 
             svg {
                 width: 36px;
@@ -52,8 +57,6 @@
         height: 100%;
         align-items: normal;
         overflow-y: auto;
-
-        margin-left: $sidebar-width;
 
         >*:not([tab-active]) {
             display: none;

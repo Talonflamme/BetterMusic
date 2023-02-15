@@ -2,6 +2,7 @@ import React from 'react';
 import { convertFiles, getFiles } from '../../../Files';
 import { Song } from '../../../Song';
 import useAsyncState from '../../../useAsyncState';
+import NoFiles from './NoFiles';
 import SongCard from './SongCard';
 
 const FilePage: React.FC<FilePageProps> = ({ toggleState, ...props }) => {
@@ -14,6 +15,7 @@ const FilePage: React.FC<FilePageProps> = ({ toggleState, ...props }) => {
     return (
         <div id="songs" className="scrollable" {...props}>
             {songs.map(song => <SongCard key={song.src} song={song} />)}
+            {songs.length ? null : <NoFiles />}
         </div>
     )
 };

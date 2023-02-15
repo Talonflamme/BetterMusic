@@ -1,16 +1,15 @@
-import { useMemo } from 'react';
 import fs from 'fs';
 import path from 'path';
 import { Song } from './Song';
 import * as mm from 'music-metadata-browser';
 
 
-const fileDirs = localStorage.getItem("fileDirs")?.split(",") ?? [];
-
 export async function getFiles() {
+    const fileDirs = localStorage.getItem("fileDirs")?.split(",") ?? [];
     const lst: string[] = [];
+    if (!fileDirs[0]) return [];
     try {
-        const promises = fileDirs.map(async(dir) => {
+        const promises = fileDirs.map(async (dir) => {
             const files = await fs.promises.readdir(dir);
             return files.filter(x => x.endsWith(".mp3")).map(x => path.join(dir, x));
         });

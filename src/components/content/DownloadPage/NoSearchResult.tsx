@@ -2,7 +2,7 @@ import React from 'react';
 
 const NoSearchResult: React.FC<NoSearchResultProps> = ({ }) => {
     return (
-        <div>NoSearchResult</div>
+        <div>NoSearchResult<br />¯\_(ツ)_/¯</div>
     )
 };
 

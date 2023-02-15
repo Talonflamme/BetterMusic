@@ -62,4 +62,22 @@
             }
         }
     }
+
+    #no-files {
+        font-size: 20px;
+        flex-direction: column;
+        width: 300px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        translate: -50% -100%;
+
+        >span {
+            font-size: 64px;
+        }
+    }
+}
+
+#tab-wrapper:has(#songs[tab-active]) {
+    margin-left: $sidebar-width; // disable "sidebar"
 }
