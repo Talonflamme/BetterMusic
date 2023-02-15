@@ -6,7 +6,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ reloadFiles, ...props }) =>
     const [filepaths, setFilepaths] = useState<string[]>([]);
 
     useEffect(() => {
-        const f = localStorage.getItem("fileDirs").split(",");
+        const f = localStorage.getItem("fileDirs")?.split(",") ?? [];
         setFilepaths(f.filter(x => x));
     }, []);
 

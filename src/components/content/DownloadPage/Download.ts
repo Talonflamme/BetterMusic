@@ -1,6 +1,7 @@
 import { YtVideo } from "./YouTubeSearch";
 import fs from 'fs';
 import path from 'path';
+import ffmpegPath from 'ffmpeg-static';
 import { spawn } from 'child_process';
 
 export async function downloadMP3(video: YtVideo, imageSrc: string, filepath: string, title: string, artist: string) {
@@ -22,14 +23,14 @@ export async function downloadMP3(video: YtVideo, imageSrc: string, filepath: st
 async function convertToMP3(vidPath: string, coverPath: string, outputPath: string, title: string, artist: string): Promise<void> {
     return new Promise((resolve, reject) => {
         // convert .mp4 to .mp3
-        const ffmpegInputProcess = spawn('ffmpeg', [
+        const ffmpegInputProcess = spawn(ffmpegPath, [
             '-i', vidPath,
             '-vn', // disable video processing, only extract audio
             '-f', 'mp3', // mp3 output format
             '-' // send output to stdout
         ], { timeout: 2000 });
         // add cover and metadata to .mp3
-        const ffmpegOutputProcess = spawn('ffmpeg', [
+        const ffmpegOutputProcess = spawn(ffmpegPath, [
             '-y', // overwrite existing file
             '-i', '-', // read input from stdin
             '-i', coverPath,

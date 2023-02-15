@@ -1,5 +1,5 @@
 {
-  "name": "bettermusic",
+  "name": "better-music",
   "version": "1.0.0",
   "description": "An application for downloading, modifying and adding songs as .mp3 files to spotify.",
   "main": "main.js",
@@ -7,11 +7,11 @@
     "build": "tsc -w && sass src/main.scss:dist/style.css",
     "start": "npx electron ."
   },
-  "author": "",
+  "author": "Pascal Oberdörfer",
   "license": "ISC",
   "dependencies": {
     "electron": "^23.0.0",
-    "fluent-ffmpeg": "^2.1.2",
+    "ffmpeg-static": "^5.1.0",
     "music-metadata-browser": "^2.5.9",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -19,7 +19,6 @@
   },
   "devDependencies": {
     "@types/electron": "^1.6.10",
-    "@types/fluent-ffmpeg": "^2.1.20",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
     "electron-reload": "^2.0.0-alpha.1",
