@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
-
+const log = require('electron-log');
 
 function createWindow() {
     // Create the browser window.
@@ -68,3 +68,6 @@ if (!app.isPackaged) {
         watch: ["public/index.html", "dist"]
     });
 }
+
+// Set up the log file
+log.initialize({ preload: true });

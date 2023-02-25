@@ -1,8 +1,12 @@
 import { YtVideo } from "./YouTubeSearch";
 import fs from 'fs';
 import path from 'path';
-import ffmpegPath from 'ffmpeg-static';
+import _ffmpegPathFromStatic from 'ffmpeg-static';
 import { spawn } from 'child_process';
+
+
+const ffmpegPath = getFfmpeg(_ffmpegPathFromStatic);
+
 
 export async function downloadMP3(video: YtVideo, imageSrc: string, filepath: string, title: string, artist: string) {
     const stream = await getHighestResolutionStream(video.vidId);
@@ -143,6 +147,10 @@ function parseFormat(format: Format): ParsedFormat {
         averageBitrate: format.averageBitrate,
         itag: format.itag
     }
+}
+
+function getFfmpeg(path: string): string {
+    return path.replace(/\.asar/gi, ".asar.unpacked")
 }
 
 /**

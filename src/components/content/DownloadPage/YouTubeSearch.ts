@@ -24,7 +24,7 @@ export type YtVideo = Omit<ParsedVid, 'thumbnailList' | 'channelThumbnailList'> 
 
 export function search(query: string): Promise<YtVideo[]> {
     const data = '{context:{client:{clientName:"WEB",clientVersion:"2.20200720.00.02"}}}';
-    const endpoint = `https://www.youtube.com/youtubei/v1/search?query=${encodeURIComponent(query)}key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&contentCheckOk=True&racyCheckOk=True`;
+    const endpoint = `https://www.youtube.com/youtubei/v1/search?query=${encodeURIComponent(query)}&key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&contentCheckOk=True&racyCheckOk=True`;
     const headers = {
         'Content-Type': 'application/json'
     };
@@ -106,7 +106,7 @@ export function search(query: string): Promise<YtVideo[]> {
                     const channel = video.ownerText.runs[0].text;
                     const channelThumbnails = video.channelThumbnailSupportedRenderers.channelThumbnailWithLinkRenderer.thumbnail.thumbnails;
                     const length = video.lengthText.simpleText;
-                    const releaseDate = video.publishedTimeText.simpleText;
+                    const releaseDate = video.publishedTimeText?.simpleText;
 
                     videos.push({ vidId, title, thumbnailList: thumbnails, channel, channelThumbnailList: channelThumbnails, length, views, releaseDate });
                 }
