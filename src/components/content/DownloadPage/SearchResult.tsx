@@ -19,6 +19,7 @@ const SearchResult: React.FC<SearchResultProps> = ({ video, setDownload }) => {
                     <div className="title label">{video.title}</div>
                     <div className="views label">{video.views}</div>
                     <div className="release-date label">{video.releaseDate}</div>
+                    <div className="length label">{video.length}</div>
                 </div>
             </div>
             <div className="download-button" onClick={onDownloadClicked}>

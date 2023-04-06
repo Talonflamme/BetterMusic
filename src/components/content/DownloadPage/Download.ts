@@ -32,7 +32,7 @@ async function convertToMP3(vidPath: string, coverPath: string, outputPath: stri
             '-vn', // disable video processing, only extract audio
             '-f', 'mp3', // mp3 output format
             '-' // send output to stdout
-        ], { timeout: 2000 });
+        ], { timeout: 10000 });
         // add cover and metadata to .mp3
         const ffmpegOutputProcess = spawn(ffmpegPath, [
             '-y', // overwrite existing file
@@ -45,7 +45,7 @@ async function convertToMP3(vidPath: string, coverPath: string, outputPath: stri
             '-metadata', `title=${title}`,
             '-metadata', `album=${title}`,
             outputPath
-        ], { timeout: 5000 });
+        ], { timeout: 15000 });
 
         ffmpegInputProcess.stdout.pipe(ffmpegOutputProcess.stdin);
 
