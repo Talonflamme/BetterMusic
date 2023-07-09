@@ -91,7 +91,6 @@ export function search(query: string): Promise<YtVideo[]> {
 
                     const video = videoDetails.videoRenderer;
                     if (!video) {
-                        console.error(videoDetails);
                         continue;
                     }
 

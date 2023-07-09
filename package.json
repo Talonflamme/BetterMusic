@@ -23,6 +23,7 @@
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
     "electron": "^23.0.0",
+    "electron-builder": "^24.4.0",
     "electron-reload": "^2.0.0-alpha.1",
     "sass": "^1.58.0"
   },

@@ -107,13 +107,13 @@ async function createPath(filetype: string): Promise<string> {
 
 async function getHighestResolutionStream(id: string): Promise<ParsedFormat> {
     const urlToFetch = `https://www.youtube.com/youtubei/v1/player?videoId=${id}&key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&contentCheckOk=True&racyCheckOk=True`; // key is hard coded
-    const bodyObj = { "context": { "client": { "clientName": "ANDROID", "clientVersion": "16.20" } } }; // also hardcoded
+    const bodyObj = {'context': {'client': {'androidSdkVersion': 30, 'clientName': 'ANDROID_MUSIC', 'clientVersion': '5.16.51'}}}; // also hardcoded
     const body = JSON.stringify(bodyObj);
     const response = await fetch(urlToFetch, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "User-Agent": "Mozilla/5.0",
+            "User-Agent": "'com.google.android.apps.youtube.music/'",
             "Accept-Language": "en-US,en",
             "Content-Length": body.length.toString()
         },
