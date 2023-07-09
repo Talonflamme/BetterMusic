@@ -117,6 +117,8 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
 function getDefaultFilepath(title: string): string {
     const musicPath = process.env.MUSIC_PATH;
     if (musicPath) return path.join(musicPath, title);
+    const fileDirs = localStorage.getItem("fileDirs")?.split(",")?.filter(x => x) ?? [];
+    if (fileDirs.length) return path.join(fileDirs[0], title);
     return path.join(os.homedir(), title);
 }
 
