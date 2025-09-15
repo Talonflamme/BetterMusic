@@ -3,25 +3,54 @@ import fs from 'fs';
 import path from 'path';
 import _ffmpegPathFromStatic from 'ffmpeg-static';
 import { spawn } from 'child_process';
+import { Progress } from "./DownloadVideoWizard";
 
 
 const ffmpegPath = getFfmpeg(_ffmpegPathFromStatic);
 
+type SetProgressFunction = (progress: Progress) => void;
 
-export async function downloadMP3(video: YtVideo, imageSrc: string, filepath: string, title: string, artist: string) {
-    const stream = await getHighestResolutionStream(video.vidId);
-    const tempPath = await createPath(stream.filetype);
+
+export async function downloadMP3(video: YtVideo, imageSrc: string, filepath: string, title: string, artist: string, setFetchProgress: SetProgressFunction, setDownloadProgress: SetProgressFunction, setConvertProgress: SetProgressFunction, setErrorMessage: (err: string) => void) {
+    setFetchProgress("pending");
+
+    let stream: ParsedFormat;
+    let tempPath: string;
+
+    try {
+        stream = await getHighestResolutionStream(video.vidId);
+        tempPath = await createPath(stream.filetype);
+        setFetchProgress("success");
+    } catch (e) {
+        console.error("Error fetching:", e);
+        setFetchProgress("error");
+        setErrorMessage(e.message ?? e.toString());
+        throw e;
+    }
+
+    setDownloadProgress("pending");
 
     try {
         await downloadVideo(stream, tempPath);
-    } catch(e) {
+        setDownloadProgress("success");
+    } catch (e) {
         console.error("Error download:", e);
+        fs.unlink(tempPath, err => {});
+        setDownloadProgress("error");
+        setErrorMessage(e.message ?? e.toString());
+        throw e;
     }
+
+    setConvertProgress("pending");
 
     try {
         await convertToMP3(tempPath, imageSrc, filepath, title, artist);
-    } catch(e) {
+        setConvertProgress("success");
+    } catch (e) {
         console.error("Error convert:", e);
+        setConvertProgress("error");
+        setErrorMessage(e.message ?? e.toString());
+        throw e;
     } finally {
         // delete temporary file
         fs.unlink(tempPath, err => {
@@ -32,7 +61,7 @@ export async function downloadMP3(video: YtVideo, imageSrc: string, filepath: st
     }
 }
 
-async function convertToMP3(vidPath: string, coverPath: string, outputPath: string, title: string, artist: string): Promise<void> {
+function convertToMP3(vidPath: string, coverPath: string, outputPath: string, title: string, artist: string): Promise<void> {
     return new Promise((resolve, reject) => {
         // convert .mp4 to .mp3
         const ffmpegInputProcess = spawn(ffmpegPath, [
@@ -76,19 +105,20 @@ async function convertToMP3(vidPath: string, coverPath: string, outputPath: stri
     });
 }
 
+
 async function downloadVideo(stream: ParsedFormat, filePath: string) {
     const stepSize = 9437184; // 9 MB
 
     let downloaded = 0; // fake
     let write_stream = fs.createWriteStream(filePath);
 
-    try {    
+    try {
         while (true) {
             let stop_pos = downloaded + stepSize - 1;
-            
+
             const resp = await fetch(`${stream.url}&range=${downloaded}-${stop_pos}`);
             const chunk = await resp.arrayBuffer();
-            
+
             const buffer = Buffer.from(chunk);
 
             downloaded += chunk.byteLength;

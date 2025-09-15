@@ -10,6 +10,8 @@ import path from 'path';
 import os from 'os';
 import CheckmarkIcon from '../../icons/CheckmarkIcon';
 
+export type Progress = "success" | "error" | "pending" | "waiting";
+
 const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVideo, reloadFiles }) => {
     const [imageSrc, setImageSrc] = useState<string>(null);
     const [downloading, setDownloading] = useState(false);
@@ -17,6 +19,12 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
     const [title, setTitle] = useState("");
     const [filepath, setFilepath] = useState("");
     const artistRef = useRef<HTMLInputElement>(null);
+
+    // progress, null=..., true = checkmark, false = cross
+    const [fetchProgress, setFetchProgress] = useState<Progress>("waiting");
+    const [downloadProgress, setDownloadProgress] = useState<Progress>("waiting");
+    const [convertProgress, setConvertProgress] = useState<Progress>("waiting");
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const openImageDialog = () => {
         ipcRenderer.once('selected-image-dialog', (_event, result) => {
@@ -44,7 +52,12 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
 
         const t = title || tryGuessTitle(video.title);
         const a = artistRef.current.value || tryGuessArtist(video.title);
-        downloadMP3(video, imageSrc, filepath + ".mp3", t, a)
+
+        setFetchProgress("waiting");
+        setDownloadProgress("waiting");
+        setConvertProgress("waiting");
+
+        downloadMP3(video, imageSrc, filepath + ".mp3", t, a, setFetchProgress, setDownloadProgress, setConvertProgress, setErrorMessage)
             .then(() => {
                 setDownloading(false);
                 setDownloadSuccess(true);
@@ -61,6 +74,13 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
         setDownloading(false);
     }
 
+    const onCloseButton = () => {
+        setFetchProgress("waiting");
+        setDownloadProgress("waiting");
+        setConvertProgress("waiting");
+        setVideo(null);
+    }
+
     useEffect(() => {
         if (!video) return;
         setImageSrc(video.thumbnail);
@@ -75,7 +95,7 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
     return (
         <div id="download-wizard-overlay" style={video ? { display: 'block' } : {}}>
             <div id="download-wizard" className="scrollable">
-                <IconButton className="cancel-button" onClick={() => setVideo(null)}>
+                <IconButton className="cancel-button" onClick={onCloseButton}>
                     <CancelIcon />
                 </IconButton>
 
@@ -109,10 +129,43 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
                 }
                 </button>
 
+                <div id="progress">
+                    <div className="row">
+                        <label>Fetching best stream:</label>
+                        {get_progress_display(fetchProgress)}
+                    </div>
+                    <div className="row">
+                        <label>Downloading stream:</label>
+                        {get_progress_display(downloadProgress)}
+                    </div>
+                    <div className="row">
+                        <label>Converting using ffmpeg:</label>
+                        {get_progress_display(convertProgress)}
+                    </div>
+                    <div className="row">
+                        <span>{errorMessage === null ? "" : "Error: "}</span>
+                        <span className="error scrollable">{errorMessage}</span>
+                    </div>
+                </div>
             </div>
         </div>
     )
 };
+
+function get_progress_display(progress: Progress) {
+    switch (progress) {
+        case "success":
+            return <CheckmarkIcon className="progress-checkmark" />;
+        case "error":
+            return <CancelIcon className="progress-cancel" />;
+        case "pending":
+            return <Spinner radius={24} color="currentColor" />;
+        case "waiting":
+            return <span className="ellipsis">&#8943;</span>;
+        default:
+            return <span>/UNEXPECTED PROGRESS\</span>
+    }
+}
 
 function getDefaultFilepath(title: string): string {
     const musicPath = process.env.MUSIC_PATH;
