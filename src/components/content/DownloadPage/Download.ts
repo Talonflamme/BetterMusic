@@ -35,7 +35,7 @@ export async function downloadMP3(video: YtVideo, imageSrc: string, filepath: st
         setDownloadProgress("success");
     } catch (e) {
         console.error("Error download:", e);
-        fs.unlink(tempPath, err => {});
+        fs.unlink(tempPath, err => { });
         setDownloadProgress("error");
         setErrorMessage(e.message ?? e.toString());
         throw e;
@@ -63,32 +63,20 @@ export async function downloadMP3(video: YtVideo, imageSrc: string, filepath: st
 
 function convertToMP3(vidPath: string, coverPath: string, outputPath: string, title: string, artist: string): Promise<void> {
     return new Promise((resolve, reject) => {
-        // convert .mp4 to .mp3
-        const ffmpegInputProcess = spawn(ffmpegPath, [
-            '-i', vidPath,
-            '-vn', // disable video processing, only extract audio
-            '-f', 'mp3', // mp3 output format
-            '-' // send output to stdout
-        ], { timeout: 10000 });
-        // add cover and metadata to .mp3
+        // convert video/audio to .mp3
         const ffmpegOutputProcess = spawn(ffmpegPath, [
-            '-y', // overwrite existing file
-            '-i', '-', // read input from stdin
-            '-i', coverPath,
-            '-map', '0', // map audio to output
-            '-map', '1', // map image (cover) to output
-            '-id3v2_version', '3',
+            '-i', vidPath,         // input file, .webm or any other audio/video format
+            '-i', coverPath,       // second input file, .jpg or other image format
+            '-map', '0:a',         // take only the audio channel from the input at index 0 (video/audio)
+            '-map', '1',           // use cover from second input (index 1)
+            '-c:a', 'libmp3lame',  // encode using LAME MP3 encoder (high quality, regarded as best encoder)
+            '-id3v2_version', '3', // metadata
             '-metadata', `artist=${artist}`,
             '-metadata', `title=${title}`,
             '-metadata', `album=${title}`,
+            '-y',                // overwrite output if it exists already
             outputPath
-        ], { timeout: 15000 });
-
-        ffmpegInputProcess.stdout.pipe(ffmpegOutputProcess.stdin);
-
-        ffmpegInputProcess.on('error', (err: Error) => {
-            reject(err);
-        });
+        ], { timeout: 60000 });
 
         ffmpegOutputProcess.on('error', (err: Error) => {
             console.error(err);
