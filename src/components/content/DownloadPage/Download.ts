@@ -11,9 +11,17 @@ const ffmpegPath = getFfmpeg(_ffmpegPathFromStatic);
 export async function downloadMP3(video: YtVideo, imageSrc: string, filepath: string, title: string, artist: string) {
     const stream = await getHighestResolutionStream(video.vidId);
     const tempPath = await createPath(stream.filetype);
-    await downloadVideo(stream, tempPath);
+
+    try {
+        await downloadVideo(stream, tempPath);
+    } catch(e) {
+        console.error("Error download:", e);
+    }
+
     try {
         await convertToMP3(tempPath, imageSrc, filepath, title, artist);
+    } catch(e) {
+        console.error("Error convert:", e);
     } finally {
         // delete temporary file
         fs.unlink(tempPath, err => {
@@ -68,29 +76,43 @@ async function convertToMP3(vidPath: string, coverPath: string, outputPath: stri
     });
 }
 
-async function downloadVideo(stream: ParsedFormat, filePath: string): Promise<void> {
-    const res = await fetch(stream.url);
-    const blob = await res.blob();
-    return new Promise<void>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsArrayBuffer(blob);
-        reader.onloadend = () => {
-            if (reader.error) {
-                reject(reader.error);
-                return;
-            }
+async function downloadVideo(stream: ParsedFormat, filePath: string) {
+    const stepSize = 9437184; // 9 MB
 
-            // @ts-expect-error
-            const buffer = Buffer.from(reader.result);
-            fs.writeFileSync(filePath, buffer);
-            resolve();
+    let downloaded = 0; // fake
+    let write_stream = fs.createWriteStream(filePath);
+
+    try {    
+        while (true) {
+            let stop_pos = downloaded + stepSize - 1;
+            
+            const resp = await fetch(`${stream.url}&range=${downloaded}-${stop_pos}`);
+            const chunk = await resp.arrayBuffer();
+            
+            const buffer = Buffer.from(chunk);
+
+            downloaded += chunk.byteLength;
+            write_stream.write(buffer);
+
+            if (chunk.byteLength < stepSize) {
+                // we are done
+                break;
+            }
         }
+    } catch (e) {
+        console.error(e);
+    }
+
+    await new Promise((resolve, reject) => {
+        write_stream.end();
+        write_stream.on('finish', resolve);
+        write_stream.on('error', reject);
     });
 }
 
 async function createPath(filetype: string): Promise<string> {
     const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-    let filePath = "";
+    let filePath = "temp_";
     for (let i = 0; i < 8; i++) {
         filePath += chars.charAt(Math.floor(Math.random() * chars.length)); // select random char
     }
@@ -106,15 +128,25 @@ async function createPath(filetype: string): Promise<string> {
 }
 
 async function getHighestResolutionStream(id: string): Promise<ParsedFormat> {
-    const urlToFetch = `https://www.youtube.com/youtubei/v1/player?videoId=${id}&key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&contentCheckOk=True&racyCheckOk=True`; // key is hard coded
-    const bodyObj = {'context': {'client': {'androidSdkVersion': 30, 'clientName': 'ANDROID_MUSIC', 'clientVersion': '5.16.51'}}}; // also hardcoded
+    const urlToFetch = `https://www.youtube.com/youtubei/v1/player?prettyPrint=false`; // key is hard coded
+    const bodyObj = {
+        "context": {
+            "client": {
+                "clientName": "ANDROID_VR", "clientVersion": "1.60.19", "deviceMake": "Oculus", "deviceModel": "Quest 3",
+                "osName": "Android", "osVersion": "12L", "androidSdkVersion": "32",
+                "visitorData": "CgtCb0lKT0Vfb09zbyi0saHGBjIKCgJERRIEEgAgVg%3D%3D"
+            }
+        }, "videoId": id,
+        "contentCheckOk": "true"
+    }; // also hardcoded
     const body = JSON.stringify(bodyObj);
     const response = await fetch(urlToFetch, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "User-Agent": "'com.google.android.apps.youtube.music/'",
+            "User-Agent": "com.google.android.apps.youtube.vr.oculus/1.60.19 (Linux; U; Android 12L; eureka-user Build/SQ3A.220605.009.A1) gzip",
             "Accept-Language": "en-US,en",
+            "X-youtube-client-name": "28",
             "Content-Length": body.length.toString()
         },
         body

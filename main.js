@@ -8,7 +8,7 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
-            devTools: !app.isPackaged
+            devTools: true
         },
         icon: path.join(__dirname, "favicon.ico")
     });
@@ -63,10 +63,7 @@ ipcMain.on('open-directory-dialog', event => {
 
 if (!app.isPackaged) {
     const electronReload = require('electron-reload');
-    electronReload(__dirname, {
-        // electron: require(`${__dirname}/node_modules/electron`),
-        watch: ["public/index.html", "dist"]
-    });
+    electronReload(path.join(__dirname, "**", "!(*temp_*)")); // don't include temporary files
 }
 
 // Set up the log file
