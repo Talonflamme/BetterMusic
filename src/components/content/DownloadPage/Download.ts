@@ -2,36 +2,34 @@ import { YtVideo } from "./YouTubeSearch";
 import fs from 'fs';
 import path from 'path';
 import _ffmpegPathFromStatic from 'ffmpeg-static';
-import { spawn } from 'child_process';
+import { spawn, execFile } from 'child_process';
+import { promisify } from "util";
 import { Progress } from "./DownloadVideoWizard";
 
+const execFileAsync = promisify(execFile);
 
 const ffmpegPath = getFfmpeg(_ffmpegPathFromStatic);
 
 type SetProgressFunction = (progress: Progress) => void;
 
+const YT_DLP_PATH = "yt-dlp.exe";
 
-export async function downloadMP3(video: YtVideo, imageSrc: string, filepath: string, title: string, artist: string, setFetchProgress: SetProgressFunction, setDownloadProgress: SetProgressFunction, setConvertProgress: SetProgressFunction, setErrorMessage: (err: string) => void) {
-    setFetchProgress("pending");
-
-    let stream: ParsedFormat;
-    let tempPath: string;
-
-    try {
-        stream = await getHighestResolutionStream(video.vidId);
-        tempPath = await createPath(stream.filetype);
-        setFetchProgress("success");
-    } catch (e) {
-        console.error("Error fetching:", e);
-        setFetchProgress("error");
-        setErrorMessage(e.message ?? e.toString());
-        throw e;
-    }
+export async function downloadMP3(video: YtVideo, imageSrc: string, filepath: string, title: string, artist: string, setDownloadProgress: SetProgressFunction, setConvertProgress: SetProgressFunction, setErrorMessage: (err: string) => void) {
+    // let tempPath: string = path.join(os.tmpdir(), `${video.vidId}.%(ext)s`); // placeholder
+    let tempPath: string = `${video.vidId}.%(ext)s`; // placeholder, gets resolved by yt-dlp
 
     setDownloadProgress("pending");
 
+    // this process returns the actual file stored with resolved extension
     try {
-        await downloadVideo(stream, tempPath);
+        tempPath = (await execFileAsync(YT_DLP_PATH, [
+            `https://www.youtube.com/watch?v=${video.vidId}`,
+            "-f", "bestaudio",
+            "-o", tempPath,
+            "--no-warnings",
+            "--print", "after_move:filename", // print filename after stream is actually downloaded
+        ])).stdout.trim();
+
         setDownloadProgress("success");
     } catch (e) {
         console.error("Error download:", e);
@@ -62,9 +60,11 @@ export async function downloadMP3(video: YtVideo, imageSrc: string, filepath: st
 }
 
 function convertToMP3(vidPath: string, coverPath: string, outputPath: string, title: string, artist: string): Promise<void> {
+    console.log(ffmpegPath);
     return new Promise((resolve, reject) => {
         // convert video/audio to .mp3
         const ffmpegOutputProcess = spawn(ffmpegPath, [
+            '-loglevel', 'error',  // show only errors, helpful for error message below
             '-i', vidPath,         // input file, .webm or any other audio/video format
             '-i', coverPath,       // second input file, .jpg or other image format
             '-map', '0:a',         // take only the audio channel from the input at index 0 (video/audio)
@@ -78,6 +78,11 @@ function convertToMP3(vidPath: string, coverPath: string, outputPath: string, ti
             outputPath
         ], { timeout: 60000 });
 
+        let stderrOutput = "";
+        ffmpegOutputProcess.stderr.on('data', (data: Buffer) => {
+            stderrOutput += data.toString();
+        });
+
         ffmpegOutputProcess.on('error', (err: Error) => {
             console.error(err);
             reject(err);
@@ -87,7 +92,7 @@ function convertToMP3(vidPath: string, coverPath: string, outputPath: string, ti
             if (code === 0) {
                 resolve();
             } else {
-                reject(new Error(`ffmpeg exited with code ${code}`));
+                reject(new Error(stderrOutput));
             }
         });
     });

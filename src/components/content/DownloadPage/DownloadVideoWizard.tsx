@@ -21,7 +21,6 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
     const artistRef = useRef<HTMLInputElement>(null);
 
     // progress, null=..., true = checkmark, false = cross
-    const [fetchProgress, setFetchProgress] = useState<Progress>("waiting");
     const [downloadProgress, setDownloadProgress] = useState<Progress>("waiting");
     const [convertProgress, setConvertProgress] = useState<Progress>("waiting");
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -53,11 +52,10 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
         const t = title || tryGuessTitle(video.title);
         const a = artistRef.current.value || tryGuessArtist(video.title);
 
-        setFetchProgress("waiting");
         setDownloadProgress("waiting");
         setConvertProgress("waiting");
 
-        downloadMP3(video, imageSrc, filepath + ".mp3", t, a, setFetchProgress, setDownloadProgress, setConvertProgress, setErrorMessage)
+        downloadMP3(video, imageSrc, filepath + ".mp3", t, a, setDownloadProgress, setConvertProgress, setErrorMessage)
             .then(() => {
                 setDownloading(false);
                 setDownloadSuccess(true);
@@ -75,7 +73,6 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
     }
 
     const onCloseButton = () => {
-        setFetchProgress("waiting");
         setDownloadProgress("waiting");
         setConvertProgress("waiting");
         setVideo(null);
@@ -130,10 +127,6 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
                 </button>
 
                 <div id="progress">
-                    <div className="row">
-                        <label>Fetching best stream:</label>
-                        {get_progress_display(fetchProgress)}
-                    </div>
                     <div className="row">
                         <label>Downloading stream:</label>
                         {get_progress_display(downloadProgress)}
