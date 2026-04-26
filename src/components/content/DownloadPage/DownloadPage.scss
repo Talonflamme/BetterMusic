@@ -284,23 +284,6 @@
                 .row {
                     display: contents;
 
-                    .progress-checkmark, .progress-cancel, .progress-spinner {
-                        width: 24px;
-                        height: 24px;
-                    }
-
-                    .progress-checkmark {
-                        color: $green;
-                    }
-
-                    .progress-cancel {
-                        color: $red;
-                    }
-
-                    .progress-spinner {
-                        color: $mono-1;
-                    }
-
                     .error {
                         color: $red;
                         max-height: 110px;
@@ -309,4 +292,21 @@
             }
         }
     }
+}
+
+.progress-checkmark, .progress-cancel, .progress-spinner {
+    width: 24px;
+    height: 24px;
+}
+
+.progress-checkmark {
+    color: $green;
+}
+
+.progress-cancel {
+    color: $red;
+}
+
+.progress-spinner {
+    color: $mono-1;
 }

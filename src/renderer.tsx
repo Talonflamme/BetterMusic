@@ -8,3 +8,5 @@ Object.assign(console, log.functions);
 
 const root = createRoot(document.getElementById("root"));
 root.render(<App />);
+
+export {};

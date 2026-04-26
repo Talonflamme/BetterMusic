@@ -145,7 +145,7 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
     )
 };
 
-function get_progress_display(progress: Progress) {
+export function get_progress_display(progress: Progress) {
     switch (progress) {
         case "success":
             return <CheckmarkIcon className="progress-checkmark" />;

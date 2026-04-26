@@ -11,6 +11,8 @@
         width: 100%;
         height: 64px;
         border-bottom: $simple-border;
+        display: grid;
+        grid-template-columns: 1fr auto;
     }
 
     #main-tabs {
