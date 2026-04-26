@@ -12,12 +12,12 @@ const ffmpegPath = getFfmpeg(_ffmpegPathFromStatic);
 
 type SetProgressFunction = (progress: Progress) => void;
 
+const YT_DLP_PATH = "yt-dlp.exe";
+
 export async function downloadMP3(video: YtVideo, imageSrc: string, filepath: string, title: string, artist: string, setDownloadProgress: SetProgressFunction, setConvertProgress: SetProgressFunction, setErrorMessage: (err: string) => void) {
     // let tempPath: string = path.join(os.tmpdir(), `${video.vidId}.%(ext)s`); // placeholder
     let tempPath: string = `${video.vidId}.%(ext)s`; // placeholder, gets resolved by yt-dlp
 
-    const YT_DLP_PATH = await window.YtDlp.getYtDlpPath();
-    
     setDownloadProgress("pending");
 
     // this process returns the actual file stored with resolved extension
