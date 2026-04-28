@@ -48,9 +48,8 @@ const FilepathInput: React.FC<FileOutputInputProps> = ({ value, setValue }) => {
     useEffect(() => {
         if (hasFocus) return; // do not show error message if user is editing
 
-        performValidation(value).then(v => {
-            setValidation(v);
-            setValue(value);
+        performValidation(value).then(validationMessage => {
+            setValidation(validationMessage);
         });
     }, [value]);
 

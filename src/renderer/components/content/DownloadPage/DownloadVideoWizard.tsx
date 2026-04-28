@@ -17,8 +17,10 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
     const [downloading, setDownloading] = useState(false);
     const [downloadSuccess, setDownloadSuccess] = useState<boolean | null>(null);
     const [title, setTitle] = useState("");
+    const [artist, setArtist] = useState("");
+    // keep track on whether the filepath was modified, if not it dynamically changes when changing the title
+    const [filepathWasModified, setFilepathWasModified] = useState(false);
     const [filepath, setFilepath] = useState("");
-    const artistRef = useRef<HTMLInputElement>(null);
 
     // progress, null=..., true = checkmark, false = cross
     const [downloadProgress, setDownloadProgress] = useState<Progress>("waiting");
@@ -50,7 +52,7 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
         if (downloadSuccess === true) return;
 
         const t = title || tryGuessTitle(video.title);
-        const a = artistRef.current.value || tryGuessArtist(video.title);
+        const a = artist || tryGuessArtist(video.title);
 
         setDownloadProgress("waiting");
         setConvertProgress("waiting");
@@ -78,16 +80,30 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
         setVideo(null);
     }
 
+    const titleInputChanged = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setTitle(event.target.value);
+
+        if (!filepathWasModified) {
+            setFilepath(getDefaultFilepath(event.target.value));
+        }
+    }
+
+    // when the wizard is opened
     useEffect(() => {
         if (!video) return;
+
         setImageSrc(video.thumbnail);
-        const t = title || tryGuessTitle(video?.title);
+        const t = tryGuessTitle(video?.title);
+        setFilepathWasModified(false);
+        setTitle("");
+        setArtist("");
         setFilepath(getDefaultFilepath(t));
+        setErrorMessage(null);
     }, [video?.vidId]);
 
     useEffect(() => {
         setDownloadSuccess(null);
-    }, [video?.vidId, title, artistRef.current?.value, filepath, imageSrc]);
+    }, [video?.vidId, title, artist, filepath, imageSrc]);
 
     return (
         <div id="download-wizard-overlay" style={video ? { display: 'block' } : {}}>
@@ -108,12 +124,15 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
                 </div>
 
                 <label id="title-input-label" htmlFor="title-input">Title</label>
-                <input type="text" id="title-input" value={title} onChange={e => setTitle(e.target.value)} placeholder={tryGuessTitle(video?.title)} />
+                <input type="text" id="title-input" value={title} onChange={titleInputChanged} placeholder={tryGuessTitle(video?.title)} />
 
                 <label id="artist-input-label" htmlFor="artist-input">Artist</label>
-                <input type="text" id="artist-input" placeholder={tryGuessArtist(video?.title)} ref={artistRef} />
+                <input type="text" id="artist-input" value={artist} onChange={e => setArtist(e.target.value)} placeholder={tryGuessArtist(video?.title)} />
 
-                <FilepathInput value={filepath} setValue={setFilepath} />
+                <FilepathInput value={filepath} setValue={file => {
+                    setFilepathWasModified(true);
+                    setFilepath(file);
+                }} />
 
                 <button className="btn flex-center download-button" onClick={onDownloadClicked}>{
                     downloadSuccess === null ?
