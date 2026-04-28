@@ -1,5 +1,7 @@
-import ffmpegPath from 'ffmpeg-static';
+import _ffmpegPathFromStatic from 'ffmpeg-static';
 import { spawn } from 'child_process';
+
+const ffmpegPath = getFfmpegPath(_ffmpegPathFromStatic);
 
 export async function convertToMP3(vidPath: string, coverPath: string, outputPath: string, title: string, artist: string): Promise<void> {
     console.log(ffmpegPath);
@@ -38,4 +40,8 @@ export async function convertToMP3(vidPath: string, coverPath: string, outputPat
             }
         });
     });
+}
+
+function getFfmpegPath(path: string): string {
+    return path.replace(/\.asar/gi, ".asar.unpacked")
 }

@@ -2,11 +2,11 @@
   "name": "better-music",
   "version": "1.0.1",
   "description": "An application for downloading, modifying and adding songs as .mp3 files to spotify.",
-  "main": "main.js",
+  "main": "dist\\main.js",
   "scripts": {
     "build": "webpack --mode production",
     "typecheck": "tsc --noEmit",
-    "deploy": "npm run build && electron-builder build dist --win",
+    "deploy": "npm run build && electron-builder build --win",
     "start": "webpack && npx electron dist\\main.js",
     "watch": "concurrently \"webpack -w\" \"npx wait-on dist/renderer.js && npx electron dist\""
   },
@@ -45,19 +45,9 @@
   "build": {
     "productName": "Better Music",
     "files": [
-      "dist/**/*",
-      "node_modules/**/*",
-      "public/**/*",
-      "assets/**/*",
-      "package.json",
-      "main.js",
-      "favicon.ico"
+      "dist/**/*"
     ],
     "extraResources": [
-      {
-        "from": "bin/ytdlp.exe",
-        "two": "bin/ytdlp.exe"
-      }
     ],
     "directories": {
       "output": "build"
