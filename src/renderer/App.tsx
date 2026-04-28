@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import MainContent from '../components/content/MainContent';
-import MusicPlayerContainer from '../components/MusicPlayer/MusicPlayerContainer';
+import MainContent from './components/content/MainContent';
+import MusicPlayerContainer from './components/MusicPlayer/MusicPlayerContainer';
 import { Song, SongContext, NULL_SONG } from './Song';
 import { convertFile } from './Files';
 import useAsyncState from './useAsyncState';

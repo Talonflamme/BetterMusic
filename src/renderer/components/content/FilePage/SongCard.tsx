@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Song, SongContext } from '../../../renderer/Song';
+import { Song, SongContext } from '../../../Song';
 import PauseIcon from '../../icons/PauseIcon';
 import PlayIcon from '../../icons/PlayIcon';
 

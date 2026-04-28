@@ -1,5 +1,5 @@
 import React, { useRef, useContext } from 'react';
-import { SongContext } from '../../renderer/Song';
+import { SongContext } from '../../Song';
 import MusicPlayer from './MusicPlayer';
 
 /**

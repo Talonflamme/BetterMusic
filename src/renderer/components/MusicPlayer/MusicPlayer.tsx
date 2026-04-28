@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Song, SongContext } from '../../renderer/Song';
+import { Song, SongContext } from '../../Song';
 import Slider from '../Slider/Slider';
 import PlayButton from './PlayButton';
 import SongInfo from './SongInfo';
