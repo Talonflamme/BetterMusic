@@ -11,7 +11,7 @@ module.exports = (env, argv) => {
     return [
         // Renderer
         {
-            entry: './src/renderer.tsx',
+            entry: './src//renderer/renderer.tsx',
             mode: isDevelopment ? 'development' : 'production',
             output: {
                 path: path.resolve(__dirname, 'dist'),
@@ -51,7 +51,7 @@ module.exports = (env, argv) => {
         },
         // Main
         {
-            entry: './src/main.ts',
+            entry: './src/main/main.ts',
             target: 'electron-main',
             mode: isDevelopment ? 'development' : 'production',
             output: {
@@ -74,7 +74,7 @@ module.exports = (env, argv) => {
         },
         // Preload
         {
-            entry: './src/preload.ts',
+            entry: './src/preload/preload.ts',
             target: 'electron-preload',
             mode: isDevelopment ? 'development' : 'production',
             output: {

@@ -1,7 +1,7 @@
 import React from 'react';
-import { convertFiles, getFiles } from '../../../Files';
-import { Song } from '../../../Song';
-import useAsyncState from '../../../useAsyncState';
+import { convertFiles, getFiles } from '../../../renderer/Files';
+import { Song } from '../../../renderer/Song';
+import useAsyncState from '../../../renderer/useAsyncState';
 import NoFiles from './NoFiles';
 import SongCard from './SongCard';
 

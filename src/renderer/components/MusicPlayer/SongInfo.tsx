@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { SongContext } from '../../Song';
-import { getImageFromMetadata } from '../../Files';
+import { SongContext } from '../../renderer/Song';
+import { getImageFromMetadata } from '../../renderer/Files';
 import * as mm from 'music-metadata-browser';
 import fs from 'fs';
 
