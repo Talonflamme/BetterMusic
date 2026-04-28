@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'path';
 import { downloadVideo } from './ytdlp';
 import log from 'electron-log/main';
+import { convertToMP3 } from './ffmpeg';
 
 function createWindow() {
     // Create the browser window.
@@ -65,6 +66,10 @@ ipcMain.on('open-directory-dialog', event => {
 
 ipcMain.handle('download-yt', async (event, videoId: string, tempPath: string) => {
     return downloadVideo(videoId, tempPath);
+});
+
+ipcMain.handle('convert-to-mp3', async (event, ...args: Parameters<typeof convertToMP3>) => {
+    return convertToMP3(...args);
 });
 
 // Set up the log file

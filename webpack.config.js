@@ -47,7 +47,7 @@ module.exports = (env, argv) => {
                         { from: 'assets', to: './assets' }
                     ]
                 })
-            ]
+            ],
         },
         // Main
         {
@@ -70,7 +70,10 @@ module.exports = (env, argv) => {
                     }
                 ]
             },
-            devtool: isDevelopment ? 'inline-source-map' : 'source-map'
+            devtool: isDevelopment ? 'inline-source-map' : 'source-map',
+            externals: {
+                'ffmpeg-static': 'commonjs ffmpeg-static'
+            }
         },
         // Preload
         {
@@ -94,5 +97,8 @@ module.exports = (env, argv) => {
                 ]
             },
             devtool: isDevelopment ? 'inline-source-map' : false,
+            externals: {
+                'ffmpeg-static': 'commonjs ffmpeg-static'
+            }
         }];
 };
