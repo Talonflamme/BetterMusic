@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'path';
-import log from 'electron-log';
+import { downloadVideo } from './ytdlp';
+import log from 'electron-log/main';
 
 function createWindow() {
     // Create the browser window.
@@ -61,9 +62,8 @@ ipcMain.on('open-directory-dialog', event => {
     });
 });
 
-ipcMain.handle('download-yt', (event) => {
-    console.log("Hello World from main");
-    return true;
+ipcMain.handle('download-yt', async (event, videoId: string, tempPath: string) => {
+    return downloadVideo(videoId, tempPath);
 });
 
 // Set up the log file
