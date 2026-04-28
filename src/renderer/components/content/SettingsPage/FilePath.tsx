@@ -14,13 +14,10 @@ const FilePath: React.FC<FilePathProps> = ({ pathIndex, filepaths, setFilepaths 
         setValue(e.target.value);
     }
 
-    const onDirIconClicked = () => {
-        ipcRenderer.once('selected-directory-dialog', (_event, result) => {
-            if (result.canceled) return;
-            setValue(result.filePaths[0]);
-        });
-
-        ipcRenderer.send('open-directory-dialog');
+    const onDirIconClicked = async () => {
+        const result = await ipcRenderer.invoke('open-directory-dialog');
+        if (result.canceled) return;
+        setValue(result.filePaths[0]);
     }
 
     const onRemove = () => {

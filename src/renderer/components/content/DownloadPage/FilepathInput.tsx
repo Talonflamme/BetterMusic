@@ -32,17 +32,14 @@ const FilepathInput: React.FC<FileOutputInputProps> = ({ value, setValue }) => {
         performValidation(value).then(setValidation);
     }
 
-    const openDialog = () => {
-        ipcRenderer.once('selected-mp3-dialog', (_event, result) => {
-            if (result.canceled) return;
-            const filepath: string = result.filePath.slice(0, -4); // remove .mp3
-            performValidation(filepath).then(v => {
-                setValidation(v);
-                setValue(filepath);
-            });
+    const openDialog = async() => {
+        const result = await ipcRenderer.invoke('open-mp3-dialog');
+        if (result.canceled) return;
+        const filepath: string = result.filePath.slice(0, -4); // remove .mp3
+        performValidation(filepath).then(v => {
+            setValidation(v);
+            setValue(filepath);
         });
-
-        ipcRenderer.send('open-mp3-dialog');
     }
 
     useEffect(() => {

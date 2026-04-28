@@ -38,29 +38,23 @@ app.on('activate', () => {
     }
 });
 
-ipcMain.on('open-image-dialog', event => {
-    dialog.showOpenDialog({
+ipcMain.handle('open-image-dialog', event => {
+    return dialog.showOpenDialog({
         properties: ['openFile'],
         filters: [{ name: "Image", extensions: ["jpg", "jpeg", "png", "gif"] }]
-    }).then(files => {
-        event.sender.send('selected-image-dialog', files);
     });
 });
 
-ipcMain.on('open-mp3-dialog', event => {
-    dialog.showSaveDialog({
+ipcMain.handle('open-mp3-dialog', event => {
+    return dialog.showSaveDialog({
         properties: ['showOverwriteConfirmation'],
         filters: [{ name: "MP3s", extensions: ["mp3"] }]
-    }).then(files => {
-        event.sender.send('selected-mp3-dialog', files);
     });
 });
 
-ipcMain.on('open-directory-dialog', event => {
-    dialog.showOpenDialog({
+ipcMain.handle('open-directory-dialog', event => {
+    return dialog.showOpenDialog({
         properties: ['openDirectory']
-    }).then(files => {
-        event.sender.send('selected-directory-dialog', files);
     });
 });
 

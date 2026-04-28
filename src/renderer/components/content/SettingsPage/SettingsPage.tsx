@@ -10,13 +10,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ reloadFiles, ...props }) =>
         setFilepaths(f.filter(x => x));
     }, []);
 
-    const onAdd = () => {
-        ipcRenderer.once('selected-directory-dialog', (_event, result) => {
-            if (result.canceled) return;
-            setFilepaths(filepaths.concat(result.filePaths));
-        });
-
-        ipcRenderer.send('open-directory-dialog');
+    const onAdd = async() => {
+        const result = await ipcRenderer.invoke('open-directory-dialog');
+        if (result.canceled) return;
+        setFilepaths(filepaths.concat(result.filePaths));
     }
 
     const save = () => {

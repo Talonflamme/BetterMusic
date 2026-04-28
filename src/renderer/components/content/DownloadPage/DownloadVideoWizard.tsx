@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import CancelIcon from '../../icons/CancelIcon';
 import { YtVideo } from './YouTubeSearch';
-import { ipcRenderer } from 'electron';
 import IconButton from '../../icons/IconButton';
 import Spinner from 'react-spinner-material';
 import { downloadMP3 } from './Download';
@@ -9,10 +8,12 @@ import FilepathInput from './FilepathInput';
 import path from 'path';
 import os from 'os';
 import CheckmarkIcon from '../../icons/CheckmarkIcon';
+import Thumbnail, { ThumbnailHandle } from './Thumbnail';
 
 export type Progress = "success" | "error" | "pending" | "waiting";
 
 const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVideo, reloadFiles }) => {
+    const thumbnailRef = useRef<ThumbnailHandle>();
     const [imageSrc, setImageSrc] = useState<string>(null);
     const [downloading, setDownloading] = useState(false);
     const [downloadSuccess, setDownloadSuccess] = useState<boolean | null>(null);
@@ -27,18 +28,6 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
     const [convertProgress, setConvertProgress] = useState<Progress>("waiting");
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const openImageDialog = () => {
-        ipcRenderer.once('selected-image-dialog', (_event, result) => {
-            if (result.canceled) return;
-            setImageSrc(result.filePaths[0]);
-        })
-
-        ipcRenderer.send('open-image-dialog');
-    };
-
-    const removeCustomThumbnail = () => {
-        setImageSrc(video.thumbnail);
-    }
 
     const onDownloadClicked = () => {
         if (downloading) {
@@ -84,7 +73,7 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
         setTitle(event.target.value);
 
         if (!filepathWasModified) {
-            setFilepath(getDefaultFilepath(event.target.value));
+            setFilepath(getDefaultFilepath(event.target.value || tryGuessTitle(video?.title)));
         }
     }
 
@@ -103,6 +92,8 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
 
     useEffect(() => {
         setDownloadSuccess(null);
+        setDownloadProgress("waiting");
+        setConvertProgress("waiting");
     }, [video?.vidId, title, artist, filepath, imageSrc]);
 
     return (
@@ -113,15 +104,7 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
                 </IconButton>
 
                 <h3>Download Wizard</h3>
-                <div className="thumbnail-wrapper flex-center">
-                    <img src={imageSrc} alt={`Thumbnail: ${video?.title}`} className="thumbnail" onClick={openImageDialog} />
-                    {
-                        video?.thumbnail !== imageSrc &&
-                        <IconButton className="remove-thumbnail-button" onClick={removeCustomThumbnail} >
-                            <CancelIcon />
-                        </IconButton>
-                    }
-                </div>
+                <Thumbnail ref={thumbnailRef} video={video} src={imageSrc} setSrc={setImageSrc} />
 
                 <label id="title-input-label" htmlFor="title-input">Title</label>
                 <input type="text" id="title-input" value={title} onChange={titleInputChanged} placeholder={tryGuessTitle(video?.title)} />
