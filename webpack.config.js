@@ -71,5 +71,28 @@ module.exports = (env, argv) => {
                 ]
             },
             devtool: isDevelopment ? 'inline-source-map' : 'source-map'
+        },
+        // Preload
+        {
+            entry: './src/preload.ts',
+            target: 'electron-preload',
+            mode: isDevelopment ? 'development' : 'production',
+            output: {
+                path: path.resolve(__dirname, 'dist'),
+                filename: 'preload.js',
+            },
+            resolve: {
+                extensions: ['.ts', '.js']
+            },
+            module: {
+                rules: [
+                    {
+                        test: /.ts$/,
+                        use: 'babel-loader',
+                        exclude: /node_modules/
+                    }
+                ]
+            },
+            devtool: isDevelopment ? 'inline-source-map' : false,
         }];
 };

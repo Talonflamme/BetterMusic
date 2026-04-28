@@ -10,6 +10,7 @@ function createWindow() {
             nodeIntegration: true,
             contextIsolation: false,
             devTools: true,
+            preload: path.join(__dirname, 'preload.js'),
         },
         icon: path.join(__dirname, "public/favicon.ico")
     });
@@ -67,4 +68,4 @@ ipcMain.handle('download-yt', async (event, videoId: string, tempPath: string) =
 });
 
 // Set up the log file
-log.initialize({ preload: true });
+log.initialize({ preload: false });
