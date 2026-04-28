@@ -1,6 +1,6 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
-const path = require('path');
-const log = require('electron-log');
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import path from 'path';
+import log from 'electron-log';
 
 function createWindow() {
     // Create the browser window.
@@ -8,15 +8,15 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
-            devTools: true
+            devTools: true,
         },
-        icon: path.join(__dirname, "favicon.ico")
+        icon: path.join(__dirname, "public/favicon.ico")
     });
     win.maximize();
     win.setMenuBarVisibility(!app.isPackaged);
 
     // Load index.html
-    win.loadFile('public/index.html');
+    win.loadFile(path.join(__dirname, 'public/index.html'));
 }
 
 app.whenReady().then(() => {
@@ -61,10 +61,10 @@ ipcMain.on('open-directory-dialog', event => {
     });
 });
 
-if (!app.isPackaged) {
-    const electronReload = require('electron-reload');
-    electronReload(path.join(__dirname, "**", "!(*temp_*)")); // don't include temporary files
-}
+ipcMain.handle('download-yt', (event) => {
+    console.log("Hello World from main");
+    return true;
+});
 
 // Set up the log file
 log.initialize({ preload: true });

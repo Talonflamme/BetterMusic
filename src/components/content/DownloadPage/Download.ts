@@ -5,6 +5,7 @@ import _ffmpegPathFromStatic from 'ffmpeg-static';
 import { spawn, execFile } from 'child_process';
 import { promisify } from "util";
 import { Progress } from "./DownloadVideoWizard";
+import { ipcRenderer } from "electron";
 
 const execFileAsync = promisify(execFile);
 
@@ -20,43 +21,44 @@ export async function downloadMP3(video: YtVideo, imageSrc: string, filepath: st
 
     setDownloadProgress("pending");
 
+    await ipcRenderer.invoke("download-yt", video.vidId, tempPath);
     // this process returns the actual file stored with resolved extension
-    try {
-        tempPath = (await execFileAsync(YT_DLP_PATH, [
-            `https://www.youtube.com/watch?v=${video.vidId}`,
-            "-f", "bestaudio",
-            "-o", tempPath,
-            "--no-warnings",
-            "--print", "after_move:filename", // print filename after stream is actually downloaded
-        ])).stdout.trim();
+    // try {
+    //     tempPath = (await execFileAsync(YT_DLP_PATH, [
+    //         `https://www.youtube.com/watch?v=${video.vidId}`,
+    //         "-f", "bestaudio",
+    //         "-o", tempPath,
+    //         "--no-warnings",
+    //         "--print", "after_move:filename", // print filename after stream is actually downloaded
+    //     ])).stdout.trim();
 
-        setDownloadProgress("success");
-    } catch (e) {
-        console.error("Error download:", e);
-        fs.unlink(tempPath, err => { });
-        setDownloadProgress("error");
-        setErrorMessage(e.message ?? e.toString());
-        throw e;
-    }
+    //     setDownloadProgress("success");
+    // } catch (e) {
+    //     console.error("Error download:", e);
+    //     fs.unlink(tempPath, err => { });
+    //     setDownloadProgress("error");
+    //     setErrorMessage(e.message ?? e.toString());
+    //     throw e;
+    // }
 
-    setConvertProgress("pending");
+    // setConvertProgress("pending");
 
-    try {
-        await convertToMP3(tempPath, imageSrc, filepath, title, artist);
-        setConvertProgress("success");
-    } catch (e) {
-        console.error("Error convert:", e);
-        setConvertProgress("error");
-        setErrorMessage(e.message ?? e.toString());
-        throw e;
-    } finally {
-        // delete temporary file
-        fs.unlink(tempPath, err => {
-            if (err) {
-                throw err;
-            }
-        });
-    }
+    // try {
+    //     await convertToMP3(tempPath, imageSrc, filepath, title, artist);
+    //     setConvertProgress("success");
+    // } catch (e) {
+    //     console.error("Error convert:", e);
+    //     setConvertProgress("error");
+    //     setErrorMessage(e.message ?? e.toString());
+    //     throw e;
+    // } finally {
+    //     // delete temporary file
+    //     fs.unlink(tempPath, err => {
+    //         if (err) {
+    //             throw err;
+    //         }
+    //     });
+    // }
 }
 
 function convertToMP3(vidPath: string, coverPath: string, outputPath: string, title: string, artist: string): Promise<void> {

@@ -1,12 +1,14 @@
 {
   "name": "better-music",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "An application for downloading, modifying and adding songs as .mp3 files to spotify.",
   "main": "main.js",
   "scripts": {
-    "build": "tsc -p build.tsconfig.json && sass src/main.scss:dist/style.css --style compressed",
-    "deploy": "npm run build && electron-builder build --win",
-    "start": "npx electron ."
+    "build": "webpack --mode production",
+    "typecheck": "tsc --noEmit",
+    "deploy": "npm run build && electron-builder build dist --win",
+    "start": "npx electron dist\\main.js",
+    "watch": "concurrently \"webpack -w\" \"npx wait-on dist/renderer.js && npx electron dist\""
   },
   "author": "Pascal Oberdörfer",
   "license": "ISC",
@@ -19,13 +21,26 @@
     "react-spinner-material": "^1.4.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.2",
+    "@babel/preset-react": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
     "@types/electron": "^1.6.10",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
+    "babel-loader": "^10.1.1",
+    "bable-loader": "^0.0.1-security",
+    "concurrently": "^9.2.1",
+    "copy-webpack-plugin": "^14.0.0",
+    "css-loader": "^7.1.4",
     "electron": "^23.0.0",
     "electron-builder": "^24.4.0",
-    "electron-reload": "^2.0.0-alpha.1",
-    "sass": "^1.58.0"
+    "sass": "^1.99.0",
+    "sass-loader": "^16.0.7",
+    "style-loader": "^4.0.0",
+    "wait-on": "^9.0.5",
+    "webpack": "^5.106.2",
+    "webpack-cli": "^7.0.2"
   },
   "build": {
     "productName": "Better Music",
@@ -37,6 +52,12 @@
       "package.json",
       "main.js",
       "favicon.ico"
+    ],
+    "extraResources": [
+      {
+        "from": "bin/ytdlp.exe",
+        "two": "bin/ytdlp.exe"
+      }
     ],
     "directories": {
       "output": "build"
