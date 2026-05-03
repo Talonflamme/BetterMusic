@@ -8,7 +8,7 @@
     "typecheck": "tsc --noEmit",
     "deploy": "npm run build && electron-builder build --win",
     "start": "webpack && npx electron dist\\main.js",
-    "watch": "concurrently \"webpack -w\" \"npx wait-on dist/renderer.js && npx electron dist\""
+    "watch": "concurrently \"webpack -w\" \"npx wait-on dist/renderer.js && npx electron dist\\main.js\""
   },
   "author": "Pascal Oberdörfer",
   "license": "ISC",

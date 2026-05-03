@@ -1,7 +1,8 @@
 import { ipcRenderer } from 'electron';
-import React, { forwardRef, useImperativeHandle } from 'react';
+import React, { forwardRef } from 'react';
 import CancelIcon from '../../icons/CancelIcon';
 import IconButton from '../../icons/IconButton';
+import Crop from './Crop';
 import { YtVideo } from './YouTubeSearch';
 
 
@@ -16,10 +17,6 @@ const Thumbnail = forwardRef<ThumbnailHandle, ThumbnailProps>(({ video, src, set
         setSrc(result.filePaths[0]);
     };
 
-    useImperativeHandle(ref, () => ({
-        imageSrc: src
-    }));
-
     return (
         <div className="thumbnail-wrapper flex-center">
             <img src={src} alt={`Thumbnail: ${video?.title}`} className="thumbnail" onClick={openImageDialog} />
@@ -29,6 +26,7 @@ const Thumbnail = forwardRef<ThumbnailHandle, ThumbnailProps>(({ video, src, set
                     <CancelIcon />
                 </IconButton>
             }
+            <Crop videoId={video?.vidId} imgSrc={src} />
         </div>
     )
 });

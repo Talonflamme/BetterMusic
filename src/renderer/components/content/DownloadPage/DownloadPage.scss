@@ -184,18 +184,103 @@
                     right: 1px;
                     width: 28px;
                     height: 28px;
-                    background: rgba(0, 0, 0, 0.075);
+                    z-index: 3;
+                    background: rgba(0, 0, 0, 0.4);
 
                     &:hover {
-                        background: rgba(0, 0, 0, 0.125);
+                        background: rgba(0, 0, 0, 0.5);
                     }
 
                     &:active {
-                        background: rgba(0, 0, 0, 0.15);
+                        background: rgba(0, 0, 0, 0.55);
                     }
 
                     >svg {
                         padding: 1px;
+                    }
+                }
+
+                .crop-wrapper {
+                    position: absolute;
+                    inset: 0;
+                    pointer-events: none;
+
+                    .crop-cover {
+                        position: absolute;
+                        inset: 0;
+                        background-color: rgba(0, 0, 0, 0.8);
+                        clip-rule: evenodd;
+                        clip-path: polygon( // Outer rect
+                                0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%,
+                                // Inner rect
+                                var(--crop-left, 0%) var(--crop-top, 0%),
+                                var(--crop-left, 0%) calc(100% - var(--crop-bottom, 0%)),
+                                calc(100% - var(--crop-right, 0%)) calc(100% - var(--crop-bottom, 0%)),
+                                calc(100% - var(--crop-right, 0%)) var(--crop-top, 0%),
+                                var(--crop-left, 0%) var(--crop-top, 0%));
+                        pointer-events: none;
+                    }
+
+                    .crop-corner {
+                        position: absolute;
+                        width: 10px;
+                        height: 10px;
+                        pointer-events: all;
+                        $thickness: 2px;
+                        filter: drop-shadow(0 0 1px black) drop-shadow(0 0 2px black);
+
+                        &.bottom {
+                            bottom: var(--crop-bottom, 0);
+                        }
+
+                        &.top {
+                            top: var(--crop-top, 0);
+                        }
+
+                        &.left {
+                            left: var(--crop-left, 0);
+                        }
+
+                        &.right {
+                            right: var(--crop-right, 0);
+                        }
+
+                        &.bottom.right {
+                            transform: rotate(-90deg);
+                            cursor: nwse-resize;
+                        }
+
+                        &.bottom.left {
+                            // no need for rotate, this is default
+                            cursor: nesw-resize;
+                        }
+
+                        &.top.right {
+                            transform: rotate(180deg);
+                            cursor: nesw-resize;
+                        }
+
+                        &.top.left {
+                            transform: rotate(90deg);
+                            cursor: nwse-resize;
+                        }
+
+                        &::after {
+                            content: "";
+                            background: white;
+                            position: absolute;
+                            inset: 0;
+                            // default is bottom left
+                            // create L shape for corner
+                            clip-path: polygon(0 0, // top left
+                                    0 100%, // bottom left
+                                    100% 100%, // bottom right
+                                    100% calc(100% - $thickness), // inner bottom right
+                                    $thickness calc(100% - $thickness), // inner bottom left
+                                    $thickness 0, // inner top left
+                                    0 0 // top left
+                                );
+                        }
                     }
                 }
 

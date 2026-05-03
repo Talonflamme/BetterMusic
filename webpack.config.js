@@ -2,6 +2,8 @@ const path = require('path');
 const fs = require('fs');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
+// TODO: scss source maps are inline?
+
 module.exports = (env, argv) => {
     const isDevelopment = argv.mode !== "production";
 
