@@ -55,6 +55,7 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
             .catch(err => {
                 setDownloading(false);
                 setDownloadSuccess(false);
+                setErrorMessage(err?.message ?? err?.toString() ?? "[ERROR]")
             });
         setDownloading(true);
     }

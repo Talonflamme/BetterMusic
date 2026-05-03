@@ -7,7 +7,7 @@ import { ipcRenderer } from "electron";
 
 type SetProgressFunction = (progress: Progress) => void;
 
-export async function downloadMP3(video: YtVideo, imageSrc: string, filepath: string, title: string, artist: string, setDownloadProgress: SetProgressFunction, setConvertProgress: SetProgressFunction, setErrorMessage: (err: string) => void) {
+export async function downloadMP3(video: YtVideo, imageSrc: string, filepath: string, title: string, artist: string, setDownloadProgress: SetProgressFunction, setConvertProgress: SetProgressFunction) {
     // let tempPath: string = path.join(os.tmpdir(), `${video.vidId}.%(ext)s`); // placeholder
     let tempPath: string = `${video.vidId}.%(ext)s`; // placeholder, gets resolved by yt-dlp
 
@@ -21,7 +21,6 @@ export async function downloadMP3(video: YtVideo, imageSrc: string, filepath: st
         console.error("Error download:", e);
         fs.unlink(tempPath, err => { });
         setDownloadProgress("error");
-        setErrorMessage(e.message ?? e.toString());
         throw e;
     }
 
@@ -33,7 +32,6 @@ export async function downloadMP3(video: YtVideo, imageSrc: string, filepath: st
     } catch (e) {
         console.error("Error convert:", e);
         setConvertProgress("error");
-        setErrorMessage(e.message ?? e.toString());
         throw e;
     } finally {
         // delete temporary file
