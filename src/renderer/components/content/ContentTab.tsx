@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { TabId } from './MainContent';
 
 const ContentTab: React.FC<ContentTabProps> = ({ id, currentTab, children }) => {
     const [renderedOnce, setRenderedOnce] = useState(id === currentTab); // if this tab was loaded once, it should stay loaded, just with display:none
@@ -26,8 +27,8 @@ function editProp(children: React.ReactNode, visible: boolean): React.ReactNode 
 }
 
 interface ContentTabProps {
-    id: number,
-    currentTab: number,
+    id: TabId,
+    currentTab: TabId,
     children?: React.ReactNode
 }
 
