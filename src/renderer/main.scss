@@ -1,8 +1,8 @@
-@import 'variables';
-@import 'style';
-@import './components/MusicPlayer/MusicPlayer';
-@import './components/content/MainContent';
-@import './components/Slider/Slider';
-@import './components/content/FilePage/FilePage';
-@import './components/content/DownloadPage/DownloadPage';
-@import './components/content/SettingsPage/SettingsPage';
+@use 'variables';
+@use 'style';
+@use 'components/MusicPlayer/MusicPlayer';
+@use 'components/content/MainContent';
+@use 'components/Slider/Slider';
+@use 'components/content/FilePage/FilePage';
+@use 'components/content/DownloadPage/DownloadPage';
+@use 'components/content/SettingsPage/SettingsPage';

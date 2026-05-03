@@ -1,4 +1,5 @@
-@import "variables";
+@use "sass:color";
+@use "variables";
 @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 
 html, body {
@@ -8,8 +9,8 @@ html, body {
 
 body {
     font-family: 'Roboto', sans-serif;
-    color: $mono-1;
-    background: $bg-color;
+    color: variables.$mono-1;
+    background: variables.$bg-color;
 }
 
 #root {
@@ -30,7 +31,7 @@ body {
     text-decoration: none;
     font-size: 15px;
     font-family: inherit;
-    transition: scale $default-transition, background-color $default-transition, opacity $default-transition;
+    transition: scale variables.$default-transition, background-color variables.$default-transition, opacity variables.$default-transition;
 
     &:focus-visible {
         outline: none;
@@ -95,21 +96,21 @@ input {
     &::-webkit-scrollbar-track {
         border-radius: 10px;
         border: $scrollbar-margin solid transparent; // basically margin
-        background: change-color($bg-color, $lightness: 12%) padding-box; // need padding-box for "margin" to work
+        background: color.change(variables.$bg-color, $lightness: 12%) padding-box; // need padding-box for "margin" to work
     }
 
     &::-webkit-scrollbar-thumb {
         border-radius: 10px;
-        background: change-color($bg-color, $lightness: 33%) padding-box; // need padding-box for "margin" to work
+        background: color.change(variables.$bg-color, $lightness: 33%) padding-box; // need padding-box for "margin" to work
         border: $scrollbar-margin solid transparent; // basically margin
         min-height: 48px;
 
         &:hover {
-            background-color: change-color($color: $bg-color, $lightness: 39%);
+            background-color: color.change($color: variables.$bg-color, $lightness: 39%);
         }
 
         &:active {
-            background-color: change-color($color: $bg-color, $lightness: 44%);
+            background-color: color.change($color: variables.$bg-color, $lightness: 44%);
         }
     }
 }

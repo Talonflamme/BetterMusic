@@ -1,10 +1,12 @@
+@use "../../variables";
+
 .slider-root {
     display: block;
     width: 100%;
     height: 4px;
     border-radius: 12px;
     padding: 13px 0;
-    color: $blue;
+    color: variables.$blue;
     position: relative;
     -webkit-user-drag: none;
     cursor: pointer;
@@ -15,7 +17,7 @@
     }
 
     .slider-taken {
-        transition: width $default-transition;
+        transition: width variables.$default-transition;
     }
 
     .slider-track {
@@ -36,7 +38,7 @@
         width: 20px;
         height: 20px;
         translate: -50% -50%;
-        transition: box-shadow $default-transition, left $default-transition;
+        transition: box-shadow variables.$default-transition, left variables.$default-transition;
 
         &:hover {
             box-shadow: rgba(144, 202, 249, 16%) 0 0 0 8px;
@@ -45,7 +47,7 @@
 
     &[data-dragging=true] {
         .slider-thumb {
-            transition: box-shadow $default-transition;
+            transition: box-shadow variables.$default-transition;
         }
 
         .slider-taken {

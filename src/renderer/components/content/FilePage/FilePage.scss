@@ -1,3 +1,6 @@
+@use "sass:color";
+@use "../../../variables";
+
 #content #songs {
     $card-size: 200px;
 
@@ -15,7 +18,7 @@
         border-radius: 6px;
         width: $card-size;
         min-height: $card-size;
-        border: $simple-border;
+        border: variables.$simple-border;
         overflow: hidden;
 
         .song-cover {
@@ -30,7 +33,7 @@
             display: flex;
             align-items: center;
             width: 100%;
-            background: $secondary-bg;
+            background: variables.$secondary-bg;
 
             .song-details {
                 white-space: nowrap;
@@ -47,17 +50,17 @@
                 margin: 8px;
                 border-radius: 50%;
                 padding: 0;
-                color: $bg-color;
+                color: variables.$bg-color;
                 width: 30px;
                 height: 30px;
-                background: $mono-1;
+                background: variables.$mono-1;
 
                 &:hover {
-                    background-color: darken($mono-1, 3.5%);
+                    background-color: color.adjust(variables.$mono-1, $lightness: -3.5%);
                 }
 
                 &:active {
-                    background-color: darken($mono-1, 7%);
+                    background-color: color.adjust(variables.$mono-1, $lightness: -7%);
                 }
             }
         }
@@ -79,5 +82,5 @@
 }
 
 #tab-wrapper:has(#songs[tab-active]) {
-    margin-left: $sidebar-width; // disable "sidebar"
+    margin-left: variables.$sidebar-width; // disable "sidebar"
 }
