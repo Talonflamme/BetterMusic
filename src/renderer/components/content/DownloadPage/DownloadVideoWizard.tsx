@@ -10,15 +10,16 @@ import os from 'os';
 import CheckmarkIcon from '../../icons/CheckmarkIcon';
 import Thumbnail from './Thumbnail';
 import { CropHandle } from './Crop';
+import { ipcRenderer } from 'electron';
+import AbortIcon from '../../icons/AbortIcon';
 
-export type Progress = "success" | "error" | "pending" | "waiting";
+export type Progress = "success" | "error" | "pending" | "waiting" | "abort";
 
 const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVideo, reloadFiles }) => {
     const imageCropRef = useRef<CropHandle>();
 
     const [imageSrc, setImageSrc] = useState<string>(null);
-    const [downloading, setDownloading] = useState(false);
-    const [downloadSuccess, setDownloadSuccess] = useState<boolean | null>(null);
+    const [downloading, setDownloading] = useState(false); // is downloading right now?
     const [title, setTitle] = useState("");
     const [artist, setArtist] = useState("");
     // keep track on whether the filepath was modified, if not it dynamically changes when changing the title
@@ -26,6 +27,7 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
     const [filepath, setFilepath] = useState("");
 
     // progress, null=..., true = checkmark, false = cross
+    const [overallProgress, setOverallProgress] = useState<Progress>("waiting");
     const [downloadProgress, setDownloadProgress] = useState<Progress>("waiting");
     const [convertProgress, setConvertProgress] = useState<Progress>("waiting");
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -40,32 +42,38 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
     }
 
     const download = () => {
-        if (downloadSuccess === true) return;
-
         const t = title || tryGuessTitle(video.title);
         const a = artist || tryGuessArtist(video.title);
 
         setDownloadProgress("waiting");
         setConvertProgress("waiting");
+        setOverallProgress("pending");
 
         const crop = imageCropRef.current.getCropRect();
 
         downloadMP3(video, imageSrc, crop, filepath + ".mp3", t, a, setDownloadProgress, setConvertProgress)
             .then(() => {
                 setDownloading(false);
-                setDownloadSuccess(true);
+                setOverallProgress("success");
                 reloadFiles(); // reloads files in 'File' tab
             })
             .catch(err => {
                 setDownloading(false);
-                setDownloadSuccess(false);
-                setErrorMessage(err?.message ?? err?.toString() ?? "[ERROR]")
+
+                if (err?.message?.includes("AbortError")) {
+                    setOverallProgress("abort");
+                } else {
+                    setOverallProgress("error");
+                    setErrorMessage(err?.message ?? err?.toString() ?? "[ERROR]")
+                }
             });
+
         setDownloading(true);
     }
 
     const cancelDownload = () => {
         setDownloading(false);
+        ipcRenderer.send("abort-download");
     }
 
     const onCloseButton = () => {
@@ -96,7 +104,7 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
     }, [video?.vidId]);
 
     useEffect(() => {
-        setDownloadSuccess(null);
+        setOverallProgress("waiting");
         setDownloadProgress("waiting");
         setConvertProgress("waiting");
     }, [video?.vidId, title, artist, filepath, imageSrc]);
@@ -122,25 +130,17 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
                     setFilepath(file);
                 }} />
 
-                <button className="btn flex-center download-button" onClick={onDownloadClicked}>{
-                    downloadSuccess === null ?
-                        (downloading ?
-                            <Spinner radius={24} stroke={3} />
-                            : "Download") :
-                        (downloadSuccess ?
-                            <CheckmarkIcon className="download-success-icon" /> :
-                            <CancelIcon className="download-success-icon" />)
-                }
+                <button className="btn flex-center download-button" onClick={onDownloadClicked}>{getDownloadButtonContent(overallProgress)}
                 </button>
 
                 <div id="progress">
                     <div className="row">
                         <label>Downloading stream:</label>
-                        {get_progress_display(downloadProgress)}
+                        {getProgressDisplay(downloadProgress)}
                     </div>
                     <div className="row">
                         <label>Converting using ffmpeg:</label>
-                        {get_progress_display(convertProgress)}
+                        {getProgressDisplay(convertProgress)}
                     </div>
                     <div className="row">
                         <span>{errorMessage === null ? "" : "Error: "}</span>
@@ -152,7 +152,22 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
     )
 };
 
-function get_progress_display(progress: Progress) {
+function getDownloadButtonContent(progress: Progress) {
+    switch (progress) {
+        case "waiting":
+            return "Download";
+        case "pending":
+            return <Spinner radius={24} stroke={3} />;
+        case "success":
+            return <CheckmarkIcon className="download-success-icon" />;
+        case "error":
+            return <CancelIcon className="download-success-icon" />;
+        default:
+            return <AbortIcon className="download-success-icon" />
+    }
+}
+
+function getProgressDisplay(progress: Progress) {
     switch (progress) {
         case "success":
             return <CheckmarkIcon className="progress-checkmark" />;
@@ -163,7 +178,7 @@ function get_progress_display(progress: Progress) {
         case "waiting":
             return <span className="ellipsis">&#8943;</span>;
         default:
-            return <span>/UNEXPECTED PROGRESS\</span>
+            return <AbortIcon className="progress-cancel" />
     }
 }
 

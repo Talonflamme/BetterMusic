@@ -1,6 +1,8 @@
 import _ffmpegPathFromStatic from 'ffmpeg-static';
 import { spawn } from 'child_process';
 import { CropRectangle } from '../renderer/components/content/DownloadPage/Crop';
+import fs from 'fs';
+import { cleanup } from './main';
 
 const ffmpegPath = getFfmpegPath(_ffmpegPathFromStatic);
 
@@ -16,13 +18,14 @@ function getCropFilter({ left, top, right, bottom }: CropRectangle): string {
     const x = `iw*${left}`;                  // x = left * iw
     const y = `ih*${top}`;                   // y = top * ih
 
-    return `crop=round(${width}):round(${height}):round(${x}):round(${y})`;                     
+    return `crop=round(${width}):round(${height}):round(${x}):round(${y})`;
 }
 
-export async function convertToMP3(vidPath: string, coverPath: string, crop: CropRectangle, outputPath: string, title: string, artist: string): Promise<void> {
+export async function convertToMP3(vidPath: string, coverPath: string, crop: CropRectangle, outputPath: string, title: string, artist: string, signal: AbortSignal): Promise<void> {
     return new Promise((resolve, reject) => {
 
         const cropFilter = getCropFilter(crop);
+        let processError: Error | null = null;
 
         // convert video/audio to .mp3
         const ffmpegOutputProcess = spawn(ffmpegPath, [
@@ -39,24 +42,36 @@ export async function convertToMP3(vidPath: string, coverPath: string, crop: Cro
             '-metadata', `album=${title}`,
             '-y',                    // overwrite output if it exists already
             outputPath
-        ], { timeout: 60000 });
-
-        let stderrOutput = "";
-        ffmpegOutputProcess.stderr.on('data', (data: Buffer) => {
-            stderrOutput += data.toString();
+        ], {
+            timeout: 60000,
+            signal
         });
 
-        ffmpegOutputProcess.on('error', (err: Error) => {
-            console.error(err);
-            reject(err);
+        let stderr = "";
+
+        ffmpegOutputProcess.stderr.on('data', data => stderr += data);
+        ffmpegOutputProcess.on('error', e => {
+            // store the error but wait for process to close (to make files free again)
+            processError = e;
+            reject(e);
         });
 
+        // 'close' is always called, even after 'error'
         ffmpegOutputProcess.on('close', (code: number) => {
-            if (code === 0) {
-                resolve();
-            } else {
-                reject(new Error(stderrOutput));
+            if (processError) {
+                reject(processError);
+                fs.unlink(outputPath, err => { if (err) console.error(err) });
+            } else if (code === 0) {
+                // vidPath is already added by yt-dlp.ts, output must not be cleaned up, so no need to add anything to `filesToBeDeleted`
+                resolve(); 
             }
+            else {
+                reject(new Error(stderr));
+                fs.unlink(outputPath, err => { if (err) console.error(err) });
+            }
+
+            // no matter if the process was successful, canceled or failed, we need to cleanup the temporary video path either way
+            cleanup();
         });
     });
 }

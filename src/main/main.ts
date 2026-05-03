@@ -3,6 +3,7 @@ import path from 'path';
 import { downloadVideo } from './ytdlp';
 import log from 'electron-log/main';
 import { convertToMP3 } from './ffmpeg';
+import fs from 'fs';
 
 function createWindow() {
     // Create the browser window.
@@ -58,12 +59,51 @@ ipcMain.handle('open-directory-dialog', event => {
     });
 });
 
-ipcMain.handle('download-yt', async (event, videoId: string, tempPath: string) => {
-    return downloadVideo(videoId, tempPath);
+type DropLast<T extends unknown[]> = Required<T> extends [...infer Head, unknown] ? Head : never;
+
+let downloadAbortController: AbortController | null = null;
+
+ipcMain.on('create-abort-controller-for-download', () => {
+    downloadAbortController = new AbortController();
 });
 
-ipcMain.handle('convert-to-mp3', async (event, ...args: Parameters<typeof convertToMP3>) => {
-    return convertToMP3(...args);
+ipcMain.on('abort-download', () => {
+    if (!downloadAbortController) {
+        console.error("Tried to abort, but controller is null");
+    } else {
+        downloadAbortController.abort();
+    }
+});
+
+/** Files that still need to be deleted. Emptied out by deleting all files upon main receiving a 'cleanup' ipc message */
+export const filesToBeDeleted: string[] = [];
+
+export function cleanup() {
+    filesToBeDeleted.forEach(file => {
+        try {
+            fs.unlinkSync(file);
+        } catch (e) {
+            console.error("Error on cleanup:", e);
+        }
+    });
+    // clear array
+    filesToBeDeleted.length = 0;
+}
+
+ipcMain.handle('download-yt', async (event, ...args: DropLast<Parameters<typeof downloadVideo>>) => {
+    if (!downloadAbortController) {
+        console.warn("Abortion controller is not set, but `downloadVideo(...)` was called");
+    }
+    
+    return downloadVideo(...args, downloadAbortController?.signal);
+});
+
+ipcMain.handle('convert-to-mp3', async (event, ...args: DropLast<Parameters<typeof convertToMP3>>) => {
+    if (!downloadAbortController) {
+        console.warn("Abortion controller is not set, but `convertToMP3(...)` was called");
+    }
+
+    return convertToMP3(...args, downloadAbortController?.signal);
 });
 
 // Set up the log file

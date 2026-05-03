@@ -2,10 +2,8 @@ import { app } from 'electron';
 import fs from 'fs';
 import https from 'https';
 import path from 'path';
-import { execFile } from 'child_process';
-import { promisify } from 'util';
-
-const execFileAsync = promisify(execFile);
+import { spawn } from 'child_process';
+import { filesToBeDeleted } from './main';
 
 const DOWNLOAD_BASE_URL = "https://github.com/yt-dlp/yt-dlp/releases/latest/download";
 
@@ -86,19 +84,52 @@ async function downloadYtDlpBuild() {
     console.log(`Downloaded yt-dlp to: ${YT_DLP_PATH}`);
 }
 
-export async function downloadVideo(videoId: string, outputPath: string) {
+export async function downloadVideo(videoId: string, outputPath: string, signal: AbortSignal): Promise<string> {
     if (!fs.existsSync(YT_DLP_PATH)) {
         await downloadYtDlpBuild();
     }
 
-    const path = (await execFileAsync(YT_DLP_PATH, [
-        `https://www.youtube.com/watch?v=${videoId}`,
-        "-U", // update to newest version
-        "-f", "bestaudio", // format with best audio quality
-        "-o", outputPath, // output path, patterns like `%(ext)s` gets resolved and replaced and returned
-        "--no-warnings",
-        "--print", "after_move:filename" // prints the resoled filename after stream is actually downloaded and file is ready
-    ])).stdout.trim();
+    return new Promise((resolve, reject) => {
+        let processError: Error | null = null;
 
-    return path;
+        const child = spawn(YT_DLP_PATH, [
+            `https://www.youtube.com/watch?v=${videoId}`,
+            "-U", // update to newest version
+            "-f", "bestaudio", // format with best audio quality
+            "-o", outputPath, // output path, patterns like `%(ext)s` gets resolved and replaced and returned
+            "--no-warnings",
+            "--print", "after_move:filename" // prints the resoled filename after stream is actually downloaded and file is ready
+        ], {
+            timeout: 120000,
+            signal
+        });
+
+        let stdout = "";
+        let stderr = "";
+
+        child.stdout.on("data", data => stdout += data);
+        child.stderr.on("data", data => stderr += data);
+        child.on("error", e => {
+            // store the error but wait for process to close (to make files free again)
+            processError = e;
+            reject(e);
+        });
+
+        // 'close' is always called, even after 'error'
+        child.on("close", code => {
+            const filename = stdout.trim();
+
+            if (!processError && code === 0) {
+                // Only if the downloaded was completed successfully, we don't immediately delete the file
+                filesToBeDeleted.push(filename);
+                resolve(filename);
+            } else if (processError) {
+                reject(processError); // should be ignored since we reject on error anyways, but just to be sure
+                fs.unlink(filename, err => { if (err) console.error(err) })
+            } else {
+                reject(new Error(stderr.trim()));
+                fs.unlink(filename, err => { if (err) console.error(err) });
+            }
+        });
+    });
 }
