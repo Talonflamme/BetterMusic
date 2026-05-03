@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
 import path from 'path';
 import { downloadVideo } from './ytdlp';
 import log from 'electron-log/main';
@@ -57,6 +57,10 @@ ipcMain.handle('open-directory-dialog', event => {
     return dialog.showOpenDialog({
         properties: ['openDirectory']
     });
+});
+
+ipcMain.on('show-file-in-folder', (event, filePath: string) => {
+    shell.showItemInFolder(filePath);
 });
 
 type DropLast<T extends unknown[]> = Required<T> extends [...infer Head, unknown] ? Head : never;
