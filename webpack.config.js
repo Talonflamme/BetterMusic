@@ -1,8 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-
-// TODO: scss source maps are inline?
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = (env, argv) => {
     const isDevelopment = argv.mode !== "production";
@@ -37,7 +36,16 @@ module.exports = (env, argv) => {
                     },
                     {
                         test: /\.scss$/,
-                        use: ['style-loader', 'css-loader', 'sass-loader']
+                        use: [
+                            MiniCssExtractPlugin.loader,
+                            {
+                                loader: 'css-loader',
+                                options: { sourceMap: true }
+                            },
+                            {
+                                loader: 'sass-loader',
+                                options: { sourceMap: true }
+                            }],
                     }
                 ]
             },
@@ -48,7 +56,8 @@ module.exports = (env, argv) => {
                         { from: 'public', to: './public' },
                         { from: 'assets', to: './assets' }
                     ]
-                })
+                }),
+                new MiniCssExtractPlugin({ filename: 'styles.css' })
             ],
         },
         // Main
