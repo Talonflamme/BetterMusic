@@ -46,7 +46,7 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
         setDownloadProgress("waiting");
         setConvertProgress("waiting");
 
-        downloadMP3(video, imageSrc, filepath + ".mp3", t, a, setDownloadProgress, setConvertProgress, setErrorMessage)
+        downloadMP3(video, imageSrc, filepath + ".mp3", t, a, setDownloadProgress, setConvertProgress)
             .then(() => {
                 setDownloading(false);
                 setDownloadSuccess(true);
