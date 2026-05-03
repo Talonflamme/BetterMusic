@@ -15,34 +15,38 @@ export async function downloadMP3(video: YtVideo, imageSrc: string, crop: CropRe
 
     ipcRenderer.send("create-abort-controller-for-download");
 
+    let result: { abort: boolean, result?: any };
+
     // above pattern gets resolved and actual filepath returned
     try {
-        tempPath = await ipcRenderer.invoke("download-yt", video.vidId, tempPath);
-        setDownloadProgress("success");
+        result = await ipcRenderer.invoke("download-yt", video.vidId, tempPath);
     } catch (e) {
-        if (e?.message?.includes("AbortError")) {
-            setDownloadProgress("abort");
-            throw e;
-        }
-
         console.error("Error download:", e);
         setDownloadProgress("error");
         throw e;
     }
 
+    if (result.abort) {
+        setDownloadProgress("abort");
+        throw new DOMException("The operation was aborted 1", "AbortError");
+    }
+
+    tempPath = result.result;
+    setDownloadProgress("success");
     setConvertProgress("pending");
 
     try {
-        await ipcRenderer.invoke('convert-to-mp3', tempPath, imageSrc, crop, filepath, title, artist);
-        setConvertProgress("success");
+        result = await ipcRenderer.invoke('convert-to-mp3', tempPath, imageSrc, crop, filepath, title, artist);
     } catch (e) {
-        if (e?.message?.includes("AbortError")) {
-            setConvertProgress("abort");
-            throw e;
-        }
-        
         console.error("Error convert:", e);
         setConvertProgress("error");
         throw e;
     }
+
+    if (result.abort) {
+        setConvertProgress("abort");
+        throw new DOMException("The operation was aborted 2", "AbortError");
+    }
+
+    setConvertProgress("success");
 }

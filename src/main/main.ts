@@ -95,7 +95,13 @@ ipcMain.handle('download-yt', async (event, ...args: DropLast<Parameters<typeof 
         console.warn("Abortion controller is not set, but `downloadVideo(...)` was called");
     }
     
-    return downloadVideo(...args, downloadAbortController?.signal);
+    try {
+        const res = await downloadVideo(...args, downloadAbortController?.signal);
+        return { abort: false, result: res };
+    } catch (e) {
+        if (e.name === "AbortError") return { abort: true }; // expected error, swallow it silently
+        throw e;
+    }
 });
 
 ipcMain.handle('convert-to-mp3', async (event, ...args: DropLast<Parameters<typeof convertToMP3>>) => {
@@ -103,7 +109,13 @@ ipcMain.handle('convert-to-mp3', async (event, ...args: DropLast<Parameters<type
         console.warn("Abortion controller is not set, but `convertToMP3(...)` was called");
     }
 
-    return convertToMP3(...args, downloadAbortController?.signal);
+    try {
+        const res = await convertToMP3(...args, downloadAbortController?.signal);
+        return { abort: false, result: res };
+    } catch (e) {
+        if (e.name === "AbortError") return { abort: true }; // expected error, swallow it silently
+        throw e;
+    };
 });
 
 // Set up the log file

@@ -60,7 +60,7 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
             .catch(err => {
                 setDownloading(false);
 
-                if (err?.message?.includes("AbortError")) {
+                if (err.name === "AbortError") {
                     setOverallProgress("abort");
                 } else {
                     setOverallProgress("error");
