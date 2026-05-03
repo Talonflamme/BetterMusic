@@ -8,12 +8,14 @@ import FilepathInput from './FilepathInput';
 import path from 'path';
 import os from 'os';
 import CheckmarkIcon from '../../icons/CheckmarkIcon';
-import Thumbnail, { ThumbnailHandle } from './Thumbnail';
+import Thumbnail from './Thumbnail';
+import { CropHandle } from './Crop';
 
 export type Progress = "success" | "error" | "pending" | "waiting";
 
 const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVideo, reloadFiles }) => {
-    const thumbnailRef = useRef<ThumbnailHandle>();
+    const imageCropRef = useRef<CropHandle>();
+
     const [imageSrc, setImageSrc] = useState<string>(null);
     const [downloading, setDownloading] = useState(false);
     const [downloadSuccess, setDownloadSuccess] = useState<boolean | null>(null);
@@ -46,7 +48,9 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
         setDownloadProgress("waiting");
         setConvertProgress("waiting");
 
-        downloadMP3(video, imageSrc, filepath + ".mp3", t, a, setDownloadProgress, setConvertProgress)
+        const crop = imageCropRef.current.getCropRect();
+
+        downloadMP3(video, imageSrc, crop, filepath + ".mp3", t, a, setDownloadProgress, setConvertProgress)
             .then(() => {
                 setDownloading(false);
                 setDownloadSuccess(true);
@@ -105,7 +109,7 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
                 </IconButton>
 
                 <h3>Download Wizard</h3>
-                <Thumbnail ref={thumbnailRef} video={video} src={imageSrc} setSrc={setImageSrc} />
+                <Thumbnail ref={imageCropRef} video={video} src={imageSrc} setSrc={setImageSrc} />
 
                 <label id="title-input-label" htmlFor="title-input">Title</label>
                 <input type="text" id="title-input" value={title} onChange={titleInputChanged} placeholder={tryGuessTitle(video?.title)} />

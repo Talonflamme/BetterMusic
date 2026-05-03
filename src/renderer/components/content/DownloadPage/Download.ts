@@ -1,13 +1,13 @@
 import { YtVideo } from "./YouTubeSearch";
 import fs from 'fs';
-import path from 'path';
 import _ffmpegPathFromStatic from 'ffmpeg-static';
 import { Progress } from "./DownloadVideoWizard";
 import { ipcRenderer } from "electron";
+import { CropRectangle } from "./Crop";
 
 type SetProgressFunction = (progress: Progress) => void;
 
-export async function downloadMP3(video: YtVideo, imageSrc: string, filepath: string, title: string, artist: string, setDownloadProgress: SetProgressFunction, setConvertProgress: SetProgressFunction) {
+export async function downloadMP3(video: YtVideo, imageSrc: string, crop: CropRectangle, filepath: string, title: string, artist: string, setDownloadProgress: SetProgressFunction, setConvertProgress: SetProgressFunction) {
     // let tempPath: string = path.join(os.tmpdir(), `${video.vidId}.%(ext)s`); // placeholder
     let tempPath: string = `${video.vidId}.%(ext)s`; // placeholder, gets resolved by yt-dlp
 
@@ -27,7 +27,7 @@ export async function downloadMP3(video: YtVideo, imageSrc: string, filepath: st
     setConvertProgress("pending");
 
     try {
-        await ipcRenderer.invoke('convert-to-mp3', tempPath, imageSrc, filepath, title, artist);
+        await ipcRenderer.invoke('convert-to-mp3', tempPath, imageSrc, crop, filepath, title, artist);
         setConvertProgress("success");
     } catch (e) {
         console.error("Error convert:", e);
@@ -42,162 +42,3 @@ export async function downloadMP3(video: YtVideo, imageSrc: string, filepath: st
         });
     }
 }
-
-
-async function downloadVideo(stream: ParsedFormat, filePath: string) {
-    const stepSize = 9437184; // 9 MB
-
-    let downloaded = 0; // fake
-    let write_stream = fs.createWriteStream(filePath);
-
-    try {
-        while (true) {
-            let stop_pos = downloaded + stepSize - 1;
-
-            const resp = await fetch(`${stream.url}&range=${downloaded}-${stop_pos}`);
-            const chunk = await resp.arrayBuffer();
-
-            const buffer = Buffer.from(chunk);
-
-            downloaded += chunk.byteLength;
-            write_stream.write(buffer);
-
-            if (chunk.byteLength < stepSize) {
-                // we are done
-                break;
-            }
-        }
-    } catch (e) {
-        console.error(e);
-    }
-
-    await new Promise((resolve, reject) => {
-        write_stream.end();
-        write_stream.on('finish', resolve);
-        write_stream.on('error', reject);
-    });
-}
-
-async function createPath(filetype: string): Promise<string> {
-    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-    let filePath = "temp_";
-    for (let i = 0; i < 8; i++) {
-        filePath += chars.charAt(Math.floor(Math.random() * chars.length)); // select random char
-    }
-    filePath += `.${filetype}`;
-    const fullPath = path.join(process.cwd(), filePath);
-    try {
-
-        await fs.promises.access(fullPath);
-        return await createPath(filetype); // file already exists
-    } catch (err) {
-        return fullPath;
-    }
-}
-
-async function getHighestResolutionStream(id: string): Promise<ParsedFormat> {
-    const urlToFetch = `https://www.youtube.com/youtubei/v1/player?prettyPrint=false`; // key is hard coded
-    const bodyObj = {
-        "context": {
-            "client": {
-                "clientName": "ANDROID_VR", "clientVersion": "1.60.19", "deviceMake": "Oculus", "deviceModel": "Quest 3",
-                "osName": "Android", "osVersion": "12L", "androidSdkVersion": "32",
-                "visitorData": "CgtCb0lKT0Vfb09zbyi0saHGBjIKCgJERRIEEgAgVg%3D%3D"
-            }
-        }, "videoId": id,
-        "contentCheckOk": "true"
-    }; // also hardcoded
-    const body = JSON.stringify(bodyObj);
-    const response = await fetch(urlToFetch, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "User-Agent": "com.google.android.apps.youtube.vr.oculus/1.60.19 (Linux; U; Android 12L; eureka-user Build/SQ3A.220605.009.A1) gzip",
-            "Accept-Language": "en-US,en",
-            "X-youtube-client-name": "28",
-            "Content-Length": body.length.toString()
-        },
-        body
-    });
-    const json: any = await response.json();
-    const streamingData: StreamingData = json.streamingData;
-
-    const formats: Format[] = (streamingData.adaptiveFormats ?? []); // this includes video/audio and both
-    formats.push(...(streamingData.formats ?? []));
-    let parsedFormats = formats.map(parseFormat);
-    parsedFormats = parsedFormats.filter(hasAudio); // only formats with audio
-
-    const ABRs = parsedFormats.map(x => ({ format: x, abr: itags[x.itag] ?? x.averageBitrate }));
-    const best = ABRs.reduce((a, b) => a.abr >= b.abr ? a : b).format;
-    return best;
-}
-
-function parseFormat(format: Format): ParsedFormat {
-    let mime = format.mimeType;
-    let codecsString: string;
-    [mime, codecsString] = mime.split(";");
-    const [type, subtype] = mime.trim().split("/"); // eg.: 'video/webm; codecs="vp9"' -> 'video/webm' -> ['video', 'webm']
-    const codecs = codecsString.split(",").map(x => x.trim());
-
-    const isAdaptive = codecs.length % 2;
-    return {
-        track: isAdaptive ? (type as any) : "both",
-        filetype: subtype,
-        url: format.url,
-        averageBitrate: format.averageBitrate,
-        itag: format.itag
-    }
-}
-
-/**
- * Streams have audio if they are not adaptive or if they are audio
- */
-function hasAudio(format: ParsedFormat): boolean {
-    return format.track !== "video";
-}
-
-type Format = { url: string, mimeType: string, averageBitrate: number, itag: number };
-type ParsedFormat = { url: string, filetype: string, averageBitrate: number, track: "audio" | "video" | "both", itag: number };
-type StreamingData = { expiresInSeconds: string, adaptiveFormats?: Format[], formats?: Format[] };
-
-
-/**
- * List of itags with their respective average bitrate (in bps).
- */
-const itags = {
-    5: 64_000,
-    6: 64_000,
-    13: 0,
-    17: 24_000,
-    18: 96_000,
-    22: 192_000,
-    34: 128_000,
-    35: 128_000,
-    36: 0,
-    37: 192_000,
-    38: 192_000,
-    43: 128_000,
-    44: 128_000,
-    45: 192_000,
-    46: 192_000,
-    59: 128_000,
-    78: 128_000,
-    82: 128_000,
-    83: 128_000,
-    84: 192_000,
-    85: 192_000,
-    91: 48_000,
-    92: 48_000,
-    93: 128_000,
-    94: 128_000,
-    95: 256_000,
-    96: 256_000,
-    100: 128_000,
-    101: 192_000,
-    102: 192_000,
-    132: 48_000,
-    151: 24_000,
-    300: 128_000,
-    301: 128_000
-}
-

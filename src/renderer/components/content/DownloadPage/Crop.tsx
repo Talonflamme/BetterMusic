@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 
 /**
  * The crop settings of a thumbnail. Relative to the image size. If an image has a width of 500px,
@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react';
  * is rendered with 480px, then the edge must appear at 432 (= 480*90%), even though the value
  * of right must still be 50.
  */
-interface CropRectangle {
+export interface CropRectangle {
     left: number,
     top: number,
     right: number,
@@ -31,7 +31,7 @@ function swapCornerAxis(axis: 'vertical' | 'horizontal', cropWrapper: HTMLElemen
     });
 }
 
-const Crop: React.FC<CropProps> = ({ imgSrc, videoId }) => {
+const Crop = forwardRef<CropHandle, CropProps>(({ imgSrc, videoId }, ref) => {
     const [crop, setCrop] = useState<CropRectangle>(CROP_ZERO);
     const [draggingCorner, setDraggingCorner] = useState<HTMLDivElement>();
 
@@ -118,6 +118,10 @@ const Crop: React.FC<CropProps> = ({ imgSrc, videoId }) => {
         setDraggingCorner(null);
     }, [videoId, imgSrc]);
 
+    useImperativeHandle(ref, () => ({
+        getCropRect: () => crop
+    }));
+
     return (
         <div className="crop-wrapper" style={cropStyle}>
             <div className="crop-cover"></div>
@@ -127,11 +131,15 @@ const Crop: React.FC<CropProps> = ({ imgSrc, videoId }) => {
             <div className="crop-corner top right" onPointerDown={onCornerPointerDown} onPointerUp={onCornerPointerUp} onPointerCancel={onCornerPointerUp} onPointerMove={onCornerPointerMove}></div>
         </div>
     )
-};
+});
 
 interface CropProps {
     imgSrc: string,
     videoId: string,
+}
+
+export interface CropHandle {
+    getCropRect: () => CropRectangle
 }
 
 export default Crop;

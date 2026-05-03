@@ -2,11 +2,11 @@ import { ipcRenderer } from 'electron';
 import React, { forwardRef } from 'react';
 import CancelIcon from '../../icons/CancelIcon';
 import IconButton from '../../icons/IconButton';
-import Crop from './Crop';
+import Crop, { CropHandle } from './Crop';
 import { YtVideo } from './YouTubeSearch';
 
 
-const Thumbnail = forwardRef<ThumbnailHandle, ThumbnailProps>(({ video, src, setSrc }, ref) => {
+const Thumbnail = forwardRef<CropHandle, ThumbnailProps>(({ video, src, setSrc }, ref) => {
     const removeCustomThumbnail = () => {
         setSrc(video.thumbnail);
     };
@@ -26,14 +26,10 @@ const Thumbnail = forwardRef<ThumbnailHandle, ThumbnailProps>(({ video, src, set
                     <CancelIcon />
                 </IconButton>
             }
-            <Crop videoId={video?.vidId} imgSrc={src} />
+            <Crop videoId={video?.vidId} imgSrc={src} ref={ref} />
         </div>
     )
 });
-
-export interface ThumbnailHandle {
-    imageSrc: string
-}
 
 interface ThumbnailProps {
     video: YtVideo,
