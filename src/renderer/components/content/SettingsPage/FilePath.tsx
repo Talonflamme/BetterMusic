@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import DirectoryIcon from '../../icons/DirectoryIcon';
 import { ipcRenderer } from 'electron';
+import React from 'react';
 import CancelIcon from '../../icons/CancelIcon';
+import DirectoryIcon from '../../icons/DirectoryIcon';
 
 const FilePath: React.FC<FilePathProps> = ({ pathIndex, filepaths, setFilepaths }) => {
     const setValue = (value: string) => {

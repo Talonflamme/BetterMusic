@@ -1,16 +1,19 @@
 import { ipcRenderer } from 'electron';
 import React, { useState, useEffect } from 'react';
+import CheckmarkIcon from '../../icons/CheckmarkIcon';
 import FilePath from './FilePath';
 
 const SettingsPage: React.FC<SettingsPageProps> = ({ reloadFiles, ...props }) => {
     const [filepaths, setFilepaths] = useState<string[]>([]);
+    const [wasJustSaved, setWasJustSaved] = useState<boolean>(false);
+    const [wasJustSavedTimeout, setWasJustSavedTimeout] = useState<NodeJS.Timeout>();
 
     useEffect(() => {
         const f = localStorage.getItem("fileDirs")?.split(",") ?? [];
         setFilepaths(f.filter(x => x));
     }, []);
 
-    const onAdd = async() => {
+    const onAdd = async () => {
         const result = await ipcRenderer.invoke('open-directory-dialog');
         if (result.canceled) return;
         setFilepaths(filepaths.concat(result.filePaths));
@@ -19,6 +22,9 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ reloadFiles, ...props }) =>
     const save = () => {
         localStorage.setItem("fileDirs", filepaths.join(","));
         reloadFiles();
+        setWasJustSaved(true);
+        clearTimeout(wasJustSavedTimeout);
+        setWasJustSavedTimeout(setTimeout(() => setWasJustSaved(false), 3000));
     }
 
     return (
@@ -28,7 +34,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ reloadFiles, ...props }) =>
                 {filepaths.map((f, i) => <FilePath key={i} pathIndex={i} filepaths={filepaths} setFilepaths={setFilepaths} />)}
             </div>
             <button className="btn" id="save-button" onClick={save}>
-                Save
+                {wasJustSaved ? <CheckmarkIcon height="100%" /> : "Save"}
             </button>
         </div>
     )
