@@ -43,7 +43,7 @@ const FilePath: React.FC<FilePathProps> = ({ pathIndex, filepaths, setFilepaths 
 
         if (!fs.existsSync(dir)) {
             setErrorLevel("warn");
-            setErrorMessage("Paaaaaath does not exist unfoalökjalödjlöasjd");
+            setErrorMessage("Path does not exist");
             return;
         }
 
