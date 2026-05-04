@@ -47,7 +47,18 @@
             #file-input {
                 width: 100%;
                 box-sizing: border-box;
-                padding-right: 54px;
+                padding-right: 80px;
+            }
+
+            .error-wrapper {
+                position: absolute;
+                width: 24px;
+                height: 24px;
+                right: 52px;
+
+                .critical {
+                    color: variables.$red;
+                }
             }
 
             #file-icon {
@@ -104,6 +115,43 @@
             }
         }
     }
+}
+
+.tooltip-bubble {
+    position: absolute;
+    background: variables.$blue;
+    color: variables.$secondary-bg;
+    border: solid 1px grey;
+    line-height: 1.45;
+    padding: 7px 11px;
+    border-radius: 6px;
+    width: max-content;
+    max-width: 260px;
+    pointer-events: none;
+    z-index: 999;
+    animation: tooltip-in 0.15s ease forwards;
+
+    @keyframes tooltip-in {
+        from {
+            opacity: 0;
+            transform: translate(-50%, calc(-100% + 4px));
+        }
+        to {
+            opacity: 1;
+            transform: translate(-50%, -100%);
+        }
+    }
+}
+
+/* Arrow pointing down */
+.tooltip-bubble::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: variables.$blue;
 }
 
 .modal-backdrop {

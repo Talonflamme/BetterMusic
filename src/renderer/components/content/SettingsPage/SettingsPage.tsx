@@ -10,7 +10,7 @@ const SettingsPage = forwardRef<SettingsPageHandle, SettingsPageProps>(({ reload
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
 
     useEffect(() => {
-        const storageString = localStorage.getItem("fileDirs");
+        const storageString = localStorage.getItem("fileDirs") ?? "";
         const unsavedString = filepaths.join(",");
         setHasUnsavedChanges(storageString !== unsavedString);
     }, [filepaths]);
@@ -27,6 +27,7 @@ const SettingsPage = forwardRef<SettingsPageHandle, SettingsPageProps>(({ reload
         setWasJustSaved(true);
         clearTimeout(wasJustSavedTimeout);
         setWasJustSavedTimeout(setTimeout(() => setWasJustSaved(false), 3000));
+        setHasUnsavedChanges(false);
     }
 
     const revertChanges = () => {
