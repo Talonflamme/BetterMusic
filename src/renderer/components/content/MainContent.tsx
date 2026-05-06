@@ -88,7 +88,7 @@ const MainContent: React.FC<MainContentProps> = ({ }) => {
                 </ContentTab>
             </div>
 
-            <UnsavedChangesModal open={showUnsavedChangesModal !== null} onSave={unsavedChangesModalOnSave} onDiscard={unsavedChangesModalOnDiscard} onCancel={unsavedChangesModalOnCancel} />
+            <UnsavedChangesModal open={showUnsavedChangesModal !== null} hasCriticalErrors={settingsPageRef.current?.hasCriticalErrors()} onSave={unsavedChangesModalOnSave} onDiscard={unsavedChangesModalOnDiscard} onCancel={unsavedChangesModalOnCancel} />
         </div>
     )
 };

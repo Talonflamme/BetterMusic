@@ -44,6 +44,11 @@ body {
     &:active {
         scale: 1.05;
     }
+
+    &:disabled {
+        pointer-events: none;
+        background-color: variables.$mono-1 !important;
+    }
 }
 
 .icon-button {

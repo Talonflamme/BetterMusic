@@ -1,25 +1,14 @@
-import React, { useState, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { ErrorLevel } from './FilePath';
+import React, { useRef } from 'react';
+import Tooltip from '../../Tooltip';
+import { ErrorLevel } from './SettingsPage';
 
 const FileErrorDisplay: React.FC<FileErrorDisplayProps> = ({ errorLevel, errorMessage }) => {
-    const [visible, setVisible] = useState(false);
-    const [pos, setPos] = useState({ top: 0, left: 0 });
-    const iconRef = useRef<HTMLDivElement>();
+    const tooltipParentRef = useRef<HTMLDivElement>();
 
     if (errorLevel === "none") return null;
 
-    const handleMouseEnter = () => {
-        const rect = iconRef.current.getBoundingClientRect();
-        setPos({
-            top: rect.top + window.scrollY - 8, // 8px gap above icon
-            left: rect.left + window.scrollX + rect.width / 2,
-        });
-        setVisible(true)
-    }
-
     return (
-        <div className="error-wrapper" ref={iconRef} onMouseEnter={handleMouseEnter} onMouseLeave={() => setVisible(false)}>
+        <div className="error-wrapper" ref={tooltipParentRef}>
             { /* Icon */}
             {
                 errorLevel === "critical" ?
@@ -35,13 +24,8 @@ const FileErrorDisplay: React.FC<FileErrorDisplayProps> = ({ errorLevel, errorMe
                         <circle cx="18" cy="27" r="1.5" fill="#78350F" />
                     </svg>
             }
-            { /* Tooltip, create portal to body because of overflow issues otherwise */}
-            {visible && createPortal(
-                errorMessage ?
-                    <div className="tooltip-bubble" style={{ top: pos.top, left: pos.left }}>{errorMessage}</div>
-                    : null,
-                document.body
-            )}
+            { /* Tooltip */}
+            <Tooltip parent={tooltipParentRef}>{errorMessage}</Tooltip>
         </div>
     )
 };

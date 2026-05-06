@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useRef } from 'react';
+import Tooltip from '../../Tooltip';
 
-const UnsavedChangesModal: React.FC<UnsavedChangesModalProps> = ({ open, onSave, onDiscard, onCancel }) => {
+const UnsavedChangesModal: React.FC<UnsavedChangesModalProps> = ({ open, onSave, onDiscard, onCancel, hasCriticalErrors }) => {
+    const saveButtonRef = useRef<HTMLElement>();
+
     if (!open) return null;
 
     return (
@@ -21,12 +24,16 @@ const UnsavedChangesModal: React.FC<UnsavedChangesModalProps> = ({ open, onSave,
                 </div>
 
                 <div className="modal-actions">
-                    <button className="btn btn-save" onClick={onSave}>
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                            <path d="M2 7.5L5.5 11L12 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        Save changes
-                    </button>
+                    <span className="save-btn-wrapper" ref={saveButtonRef}>
+                        <button className="btn btn-save" onClick={onSave} disabled={hasCriticalErrors}>
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                <path d="M2 7.5L5.5 11L12 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            Save changes
+                        </button>
+
+                        <Tooltip parent={saveButtonRef} enabled={hasCriticalErrors}>Please fix any errors</Tooltip>
+                    </span>
                     <button className="btn btn-discard" onClick={onDiscard}>
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                             <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -44,6 +51,7 @@ const UnsavedChangesModal: React.FC<UnsavedChangesModalProps> = ({ open, onSave,
 
 interface UnsavedChangesModalProps {
     open: boolean,
+    hasCriticalErrors: boolean,
     onSave: () => void,
     onDiscard: () => void,
     onCancel: () => void,

@@ -5,8 +5,7 @@ import DirectoryIcon from '../../icons/DirectoryIcon';
 import FileErrorDisplay from './FileErrorDisplay';
 import fs from 'fs';
 import path from 'path';
-
-export type ErrorLevel = "warn" | "critical" | "none";
+import { ErrorLevel } from './SettingsPage';
 
 function isPathEqual(a: string, b: string): boolean {
     let resolved1 = path.resolve(a);
@@ -25,9 +24,8 @@ function isPathEqual(a: string, b: string): boolean {
     return resolved1 === resolved2;
 }
 
-const FilePath: React.FC<FilePathProps> = ({ pathIndex, filepaths, setFilepaths }) => {
+const FilePath: React.FC<FilePathProps> = ({ pathIndex, filepaths, setFilepaths, fileErrors, setFileErrors }) => {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [errorLevel, setErrorLevel] = useState<ErrorLevel>("none");
 
     useEffect(() => {
         const dir = filepaths[pathIndex];
@@ -35,19 +33,19 @@ const FilePath: React.FC<FilePathProps> = ({ pathIndex, filepaths, setFilepaths 
         // check if path is duplicate
         for (let i = 0; i < pathIndex; i++) {
             if (isPathEqual(dir, filepaths[i])) {
-                setErrorLevel("critical");
+                setFileErrors(prev => ({ ...prev, [pathIndex]: "critical" }));
                 setErrorMessage("Duplicate directory, must be removed");
                 return;
             }
         }
 
         if (!fs.existsSync(dir)) {
-            setErrorLevel("warn");
+            setFileErrors(prev => ({ ...prev, [pathIndex]: "warn" }));
             setErrorMessage("Path does not exist");
             return;
         }
 
-        setErrorLevel("none");
+        setFileErrors(prev => ({ ...prev, [pathIndex]: "none" }));
         setErrorMessage(null);
     }, [filepaths, pathIndex]);
 
@@ -69,12 +67,17 @@ const FilePath: React.FC<FilePathProps> = ({ pathIndex, filepaths, setFilepaths 
 
     const onRemove = () => {
         setFilepaths(filepaths.filter((_, i) => i !== pathIndex)); // remove this index
+        setFileErrors(prev => {
+            // remove pathIndex as key
+            const { [pathIndex]: _, ...rest } = prev;
+            return rest;
+        });
     }
 
     return (
         <div className="filepath">
             <input type="text" id="file-input" spellCheck="false" value={filepaths[pathIndex]} onChange={handleChange} />
-            <FileErrorDisplay errorLevel={errorLevel} errorMessage={errorMessage} />
+            <FileErrorDisplay errorLevel={fileErrors[pathIndex]} errorMessage={errorMessage} />
             <DirectoryIcon id="file-icon" onClick={onDirIconClicked} />
             <CancelIcon id="remove-icon" onClick={onRemove} />
         </div>
@@ -84,7 +87,9 @@ const FilePath: React.FC<FilePathProps> = ({ pathIndex, filepaths, setFilepaths 
 interface FilePathProps {
     pathIndex: number,
     filepaths: string[],
-    setFilepaths: (paths: string[]) => void
+    setFilepaths: (paths: string[]) => void,
+    fileErrors: Record<number, ErrorLevel>,
+    setFileErrors: React.Dispatch<React.SetStateAction<Record<number, ErrorLevel>>>
 }
 
 export default FilePath;
