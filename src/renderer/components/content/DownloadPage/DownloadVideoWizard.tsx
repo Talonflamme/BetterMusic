@@ -110,8 +110,8 @@ const DownloadVideoWizard: React.FC<DownloadVideoWizardProps> = ({ video, setVid
     }, [video?.vidId, title, artist, filepath, imageSrc]);
 
     return (
-        <div id="download-wizard-overlay" style={video ? { display: 'block' } : {}}>
-            <div id="download-wizard" className="scrollable">
+        <div id="download-wizard-overlay" className="background-overlay" style={video ? { display: 'block' } : {}}>
+            <div id="download-wizard" className="scrollable overlay-modal">
                 <IconButton className="cancel-button" onClick={onCloseButton}>
                     <CancelIcon />
                 </IconButton>

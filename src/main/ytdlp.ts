@@ -133,3 +133,33 @@ export async function downloadVideo(videoId: string, outputPath: string, signal:
         });
     });
 }
+
+export async function getAudioUrl(videoId: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const child = spawn(YT_DLP_PATH, [
+            "--get-url", // only print the url
+            `https://www.youtube.com/watch?v=${videoId}`,
+            "-U", // update to newest version
+            "-f", "bestaudio", // format with best audio quality
+            "--no-warnings"
+        ], {
+            timeout: 3000,
+        });
+        
+        let stdout = "";
+        let stderr = "";
+        
+        child.stdout.on("data", data => stdout += data);
+        child.stderr.on("data", data => stderr += data);
+        child.on("error", e => reject(e));
+
+        child.on("close", code => {
+            if (code === 0) {
+                resolve(stdout.trim());
+            } else {
+                console.error("Rejected with code ", code);
+                reject(stderr.trim());
+            }
+        });
+    });
+}

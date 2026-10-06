@@ -1,6 +1,6 @@
 import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
 import path from 'path';
-import { downloadVideo } from './ytdlp';
+import { downloadVideo, getAudioUrl } from './ytdlp';
 import log from 'electron-log/main';
 import { convertToMP3 } from './ffmpeg';
 import fs from 'fs';
@@ -120,6 +120,10 @@ ipcMain.handle('convert-to-mp3', async (event, ...args: DropLast<Parameters<type
         if (e.name === "AbortError") return { abort: true }; // expected error, swallow it silently
         throw e;
     };
+});
+
+ipcMain.handle("get-audio-url", async (event, ...args: Parameters<typeof getAudioUrl>) => {
+    return getAudioUrl(...args);
 });
 
 // Set up the log file

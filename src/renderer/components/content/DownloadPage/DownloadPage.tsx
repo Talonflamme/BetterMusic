@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import SearchIcon from '../../icons/SearchIcon';
 import DownloadVideoWizard from './DownloadVideoWizard';
+import Preview from './Preview';
 import SearchResults from './SearchResults';
 import { search, YtVideo } from './YouTubeSearch';
 
@@ -8,6 +9,7 @@ const DownloadPage: React.FC<DownloadPageProps> = ({ reloadFiles, ...props }) =>
     const [query, setQuery] = useState("");
     const [searchResults, setSearchResults] = useState<YtVideo[]>(null);
     const [downloadVideo, setDownloadVideo] = useState<YtVideo>(null);
+    const [preview, setPreview] = useState<YtVideo>(null);
 
     const onSearchChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
         setQuery(evt.target.value);
@@ -33,8 +35,9 @@ const DownloadPage: React.FC<DownloadPageProps> = ({ reloadFiles, ...props }) =>
                 </div>
             </div>
 
-            <SearchResults searchResults={searchResults} setDownload={setDownloadVideo} />
+            <SearchResults searchResults={searchResults} setDownload={setDownloadVideo} setPreview={setPreview} />
             <DownloadVideoWizard video={downloadVideo} setVideo={setDownloadVideo} reloadFiles={reloadFiles} />
+            <Preview video={preview} setVideo={setPreview} setDownload={setDownloadVideo} />
         </div>
     )
 };
