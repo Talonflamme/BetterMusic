@@ -135,6 +135,10 @@ export async function downloadVideo(videoId: string, outputPath: string, signal:
 }
 
 export async function getAudioUrl(videoId: string): Promise<string> {
+    if (!fs.existsSync(YT_DLP_PATH)) {
+        await downloadYtDlpBuild();
+    }
+
     return new Promise((resolve, reject) => {
         const child = spawn(YT_DLP_PATH, [
             "--get-url", // only print the url
@@ -145,10 +149,10 @@ export async function getAudioUrl(videoId: string): Promise<string> {
         ], {
             timeout: 3000,
         });
-        
+
         let stdout = "";
         let stderr = "";
-        
+
         child.stdout.on("data", data => stdout += data);
         child.stderr.on("data", data => stderr += data);
         child.on("error", e => reject(e));
