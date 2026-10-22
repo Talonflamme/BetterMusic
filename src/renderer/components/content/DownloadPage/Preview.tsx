@@ -1,11 +1,13 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useContext } from 'react';
 import { ipcRenderer } from 'electron';
 import { YtVideo } from './YouTubeSearch';
 import IconButton from '../../icons/IconButton';
 import CancelIcon from '../../icons/CancelIcon';
+import { SongContext } from '../../../Song';
 
 const Preview: React.FC<PreviewProps> = ({ video, setVideo, setDownload }) => {
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
+    const { setIsPlaying } = useContext(SongContext);
 
     const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -32,6 +34,7 @@ const Preview: React.FC<PreviewProps> = ({ video, setVideo, setDownload }) => {
         ipcRenderer.invoke("get-audio-url", video.vidId)
             .then(url => {
                 setAudioUrl(url);
+                setIsPlaying(false); // pause main audio player
             })
             .catch(err => {
                 console.error(`Failed to get url for '${video.vidId}': `, err);
