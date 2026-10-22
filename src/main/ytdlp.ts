@@ -147,7 +147,7 @@ export async function getAudioUrl(videoId: string): Promise<string> {
             "-f", "bestaudio", // format with best audio quality
             "--no-warnings"
         ], {
-            timeout: 3000,
+            timeout: 10000,
         });
 
         let stdout = "";
